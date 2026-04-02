@@ -21,6 +21,7 @@
             --spike: #ff6b35;
             --success: #00ff88;
             --purple: #a855f7;
+            --pink: #ec4899;
         }
 
         body {
@@ -28,41 +29,37 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1.5rem;
         }
 
         /* Header */
         .header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
+            margin-bottom: 0.25rem;
         }
 
         .header p {
             color: var(--text-dim);
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
-        /* Main Grid */
-        .main-grid {
+        /* Main Layout */
+        .main-layout {
             display: grid;
-            grid-template-columns: 300px 1fr 300px;
-            gap: 2rem;
-            max-width: 1600px;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 1.5rem;
+            max-width: 1700px;
             margin: 0 auto;
         }
 
-        @media (max-width: 1200px) {
-            .main-grid {
+        @media (max-width: 1300px) {
+            .main-layout {
                 grid-template-columns: 1fr;
             }
         }
@@ -72,69 +69,66 @@
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 1.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
         }
 
         .card-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-dim);
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        /* Input Section */
-        .input-type-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.25rem;
+        /* Drawing Area */
+        .draw-container {
+            position: relative;
         }
 
-        .input-tab {
-            flex: 1;
-            padding: 0.75rem;
-            background: transparent;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .input-tab:hover {
-            border-color: var(--accent);
-            color: var(--text);
-        }
-
-        .input-tab.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #000;
-            font-weight: 600;
-        }
-
-        .draw-area {
+        .draw-canvas {
+            width: 100%;
+            aspect-ratio: 1;
             background: #000;
             border: 2px solid var(--border);
             border-radius: 12px;
-            aspect-ratio: 1;
             cursor: crosshair;
-            margin-bottom: 1rem;
+            touch-action: none;
+        }
+
+        .draw-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .draw-hint.hidden {
+            display: none;
         }
 
         .draw-controls {
             display: flex;
             gap: 0.5rem;
+            margin-top: 0.75rem;
         }
 
         .draw-btn {
             flex: 1;
-            padding: 0.6rem;
+            padding: 0.65rem;
             background: var(--border);
             border: none;
             border-radius: 8px;
@@ -149,34 +143,51 @@
             color: #000;
         }
 
-        .shapes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        /* Brush Size */
+        .brush-control {
+            display: flex;
+            align-items: center;
             gap: 0.75rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
         }
 
-        .shape-btn {
-            aspect-ratio: 1;
-            background: #000;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 2rem;
+        .brush-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .brush-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .brush-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
             cursor: pointer;
-            transition: all 0.2s;
+        }
+
+        .brush-preview {
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .shape-btn:hover {
-            border-color: var(--accent);
-            transform: scale(1.05);
-        }
-
-        .shape-btn.selected {
-            border-color: var(--accent);
-            background: rgba(0, 212, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        .brush-dot {
+            background: var(--accent);
+            border-radius: 50%;
         }
 
         /* Process Button */
@@ -190,7 +201,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             transition: all 0.3s;
             display: flex;
             align-items: center;
@@ -209,405 +220,28 @@
             transform: none;
         }
 
-        /* Center - Visualization */
-        .center-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        /* Flow Diagram */
-        .flow-diagram {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr auto 1fr;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-        }
-
-        .flow-step {
-            text-align: center;
-            padding: 1.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            transition: all 0.3s;
-        }
-
-        .flow-step.active {
-            border-color: var(--spike);
-            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
-        }
-
-        .flow-step.complete {
-            border-color: var(--success);
-        }
-
-        .flow-step-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .flow-step-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .flow-step-desc {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        .flow-arrow {
-            font-size: 2rem;
-            color: var(--border);
-            transition: all 0.3s;
-        }
-
-        .flow-arrow.active {
-            color: var(--spike);
-            animation: pulse 0.5s ease infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        /* Spike Visualization - MAIN FEATURE */
-        .spike-display {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-
-        .spike-display-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .spike-container {
-            background: #000;
-            border-radius: 12px;
-            padding: 1rem;
-            height: 300px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .spike-layer {
-            display: flex;
-            align-items: center;
-            height: 60px;
-            border-bottom: 1px solid var(--border);
-            position: relative;
-        }
-
-        .spike-layer:last-child {
-            border-bottom: none;
-        }
-
-        .spike-layer-label {
-            width: 80px;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            padding-right: 1rem;
-            text-align: right;
-        }
-
-        .spike-track {
-            flex: 1;
-            height: 100%;
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 4px;
-        }
-
-        /* Individual Spike - HIGHLY VISIBLE */
-        .spike {
-            position: absolute;
-            width: 4px;
-            height: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-radius: 2px;
-            animation: spikeAppear 0.2s ease;
-        }
-
-        .spike.input { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        .spike.hidden { background: var(--purple); box-shadow: 0 0 10px var(--purple); }
-        .spike.output { background: var(--success); box-shadow: 0 0 10px var(--success); }
-
-        @keyframes spikeAppear {
-            from { 
-                transform: translateY(-50%) scaleY(0); 
-                opacity: 0;
-            }
-            to { 
-                transform: translateY(-50%) scaleY(1); 
-                opacity: 1;
-            }
-        }
-
-        .spike-legend {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-dim);
-        }
-
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
-
-        /* What Chip Sees */
-        .chip-sees {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-
-        .sees-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .sees-panel {
-            background: #000;
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .sees-panel-title {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-bottom: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .sees-canvas {
-            width: 100%;
-            aspect-ratio: 1;
-            background: #0a0a0f;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        /* Output Section */
-        .output-section {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .output-result {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .output-waiting {
-            color: var(--text-dim);
-            font-size: 1rem;
-        }
-
-        .output-waiting-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        .result-display {
-            display: none;
-        }
-
-        .result-icon {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: resultPop 0.5s ease;
-        }
-
-        @keyframes resultPop {
-            from { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            to { transform: scale(1); }
-        }
-
-        .result-label {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-confidence {
-            font-size: 1rem;
-            color: var(--text-dim);
-            margin-bottom: 1.5rem;
-        }
-
-        .result-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-
-        .result-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--success));
-            border-radius: 6px;
-            transition: width 1s ease;
-        }
-
-        .result-message {
-            font-size: 0.9rem;
-            color: var(--success);
-            padding: 1rem;
-            background: rgba(0, 255, 136, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-        }
-
-        /* All Classes Output */
-        .all-classes {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 1.5rem;
-        }
-
-        .class-row {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
-        }
-
-        .class-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .class-row.winner {
-            background: rgba(0, 255, 136, 0.15);
-            border: 1px solid var(--success);
-        }
-
-        .class-icon {
-            font-size: 1.5rem;
-            width: 40px;
-            text-align: center;
-        }
-
-        .class-name {
-            flex: 1;
-            font-size: 0.95rem;
-            margin-left: 0.5rem;
-        }
-
-        .class-spikes {
-            font-size: 0.9rem;
-            color: var(--spike);
-            font-weight: 600;
-            width: 60px;
-            text-align: right;
-        }
-
-        .class-bar {
-            width: 100px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            margin-left: 1rem;
-            overflow: hidden;
-        }
-
-        .class-bar-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .class-row.winner .class-bar-fill {
-            background: var(--success);
-        }
-
-        /* Stats Panel */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            margin-top: 0.25rem;
-        }
-
         /* Parameters */
         .param-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .param-group:last-child {
+            margin-bottom: 0;
         }
 
         .param-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
 
         .param-name {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
         .param-value {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--accent);
             font-family: monospace;
         }
@@ -618,83 +252,561 @@
             -webkit-appearance: none;
             background: var(--border);
             border-radius: 3px;
-            outline: none;
         }
 
         .param-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             background: var(--accent);
             border-radius: 50%;
             cursor: pointer;
         }
 
         .param-desc {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-dim);
-            margin-top: 0.5rem;
-            line-height: 1.4;
+            margin-top: 0.35rem;
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .flow-diagram {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-            
-            .flow-arrow {
-                transform: rotate(90deg);
-            }
-            
-            .sees-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Center Section */
+        .center-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* Flow Steps */
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .flow-step.active {
+            border-color: var(--spike);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .flow-step.complete {
+            border-color: var(--success);
+        }
+
+        .flow-step-icon {
+            font-size: 1.25rem;
+        }
+
+        .flow-step-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            color: var(--text-dim);
+            font-size: 1.25rem;
+        }
+
+        .flow-arrow.active {
+            color: var(--spike);
+        }
+
+        /* Spike Timeline - SCROLLABLE */
+        .spike-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        .spike-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .spike-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spike-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .spike-stat {
+            color: var(--text-dim);
+        }
+
+        .spike-stat span {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Scrollable Spike Container */
+        .spike-scroll-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .spike-scroll-hint {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0,0,0,0.8);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .spike-viewport {
+            height: 280px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            cursor: grab;
+            position: relative;
+        }
+
+        .spike-viewport:active {
+            cursor: grabbing;
+        }
+
+        .spike-viewport::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .spike-viewport::-webkit-scrollbar-track {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .spike-viewport::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        .spike-canvas-wrapper {
+            display: inline-block;
+            min-width: 100%;
+            height: 100%;
+        }
+
+        .spike-canvas {
+            height: 260px;
+            min-width: 800px;
+        }
+
+        /* Zoom Controls */
+        .spike-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--border);
+            border: none;
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .zoom-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .spike-legend {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .legend-bar {
+            width: 16px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        /* What Chip Sees */
+        .chip-sees {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .sees-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .sees-title {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .sees-canvas {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        /* Output Section */
+        .output-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main Result */
+        .result-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .result-waiting {
+            padding: 2rem 0;
+        }
+
+        .result-waiting-icon {
+            font-size: 3.5rem;
+            opacity: 0.3;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-waiting-text {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-content.visible {
+            display: block;
+        }
+
+        .result-detected {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-main {
+            font-size: 4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-label {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--purple);
+            color: #fff;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .result-confidence {
+            margin-bottom: 1rem;
+        }
+
+        .confidence-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .confidence-bar {
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 6px;
+            transition: width 0.8s ease;
+        }
+
+        .confidence-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-top: 0.5rem;
+        }
+
+        .result-message {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            padding: 1rem;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        /* Top Matches */
+        .matches-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .match-row {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .match-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .match-row.winner {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--success);
+        }
+
+        .match-rank {
+            width: 24px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .match-row.winner .match-rank {
+            background: var(--success);
+            color: #000;
+        }
+
+        .match-icon {
+            font-size: 1.25rem;
+            width: 32px;
+            text-align: center;
+        }
+
+        .match-info {
+            flex: 1;
+            margin-left: 0.5rem;
+        }
+
+        .match-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .match-type {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .match-spikes {
+            font-size: 0.85rem;
+            color: var(--spike);
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .match-bar {
+            width: 80px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .match-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .match-row.winner .match-bar-fill {
+            background: var(--success);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.3);
+            padding: 0.75rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-top: 0.15rem;
+        }
+
+        /* Recognition Categories Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-tab {
+            flex: 1;
+            padding: 0.5rem;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .category-tab:hover {
+            border-color: var(--accent);
+        }
+
+        .category-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <h1>🧠 Neuromorphic Chip Simulator</h1>
-        <p>Draw or select an input → Watch spikes flow → See what the chip detects</p>
+        <p>Draw anything → Watch real spikes → See what the chip recognizes</p>
     </header>
 
-    <div class="main-grid">
+    <div class="main-layout">
         <!-- LEFT: Input -->
         <div class="input-section">
             <div class="card">
-                <div class="card-title">📥 Your Input</div>
+                <div class="card-title">✏️ Draw Your Input</div>
                 
-                <div class="input-type-tabs">
-                    <button class="input-tab active" onclick="setInputType('draw')">✏️ Draw</button>
-                    <button class="input-tab" onclick="setInputType('shape')">🔷 Shape</button>
-                </div>
-
-                <!-- Draw Mode -->
-                <div id="drawMode">
-                    <canvas class="draw-area" id="drawCanvas" width="250" height="250"></canvas>
-                    <div class="draw-controls">
-                        <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
-                        <button class="draw-btn" onclick="drawRandom()">🎲 Random</button>
+                <div class="draw-container">
+                    <canvas class="draw-canvas" id="drawCanvas" width="300" height="300"></canvas>
+                    <div class="draw-hint" id="drawHint">
+                        Draw a letter, number, or shape here
                     </div>
                 </div>
 
-                <!-- Shape Mode -->
-                <div id="shapeMode" style="display: none;">
-                    <div class="shapes-grid">
-                        <button class="shape-btn" data-shape="circle" onclick="selectShape('circle')">⭕</button>
-                        <button class="shape-btn" data-shape="square" onclick="selectShape('square')">⬜</button>
-                        <button class="shape-btn" data-shape="triangle" onclick="selectShape('triangle')">🔺</button>
-                        <button class="shape-btn" data-shape="star" onclick="selectShape('star')">⭐</button>
-                        <button class="shape-btn" data-shape="heart" onclick="selectShape('heart')">❤️</button>
-                        <button class="shape-btn" data-shape="cross" onclick="selectShape('cross')">✖️</button>
+                <div class="brush-control">
+                    <span class="brush-label">Brush:</span>
+                    <input type="range" class="brush-slider" id="brushSize" min="4" max="30" value="12">
+                    <div class="brush-preview">
+                        <div class="brush-dot" id="brushPreview" style="width: 12px; height: 12px;"></div>
                     </div>
+                </div>
+
+                <div class="draw-controls">
+                    <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
+                    <button class="draw-btn" onclick="drawExample('letter')">🔤 Letter</button>
+                    <button class="draw-btn" onclick="drawExample('number')">🔢 Number</button>
+                    <button class="draw-btn" onclick="drawExample('shape')">⭐ Shape</button>
                 </div>
 
                 <button class="process-btn" id="processBtn" onclick="processInput()">
@@ -702,8 +814,7 @@
                 </button>
             </div>
 
-            <!-- Parameters -->
-            <div class="card" style="margin-top: 1.5rem;">
+            <div class="card">
                 <div class="card-title">⚙️ Chip Parameters</div>
                 
                 <div class="param-group">
@@ -712,108 +823,119 @@
                         <span class="param-value" id="threshVal">1.0</span>
                     </div>
                     <input type="range" class="param-slider" id="threshold" min="0.5" max="2" step="0.1" value="1.0">
-                    <p class="param-desc">Higher = neurons need more input to fire a spike</p>
+                    <p class="param-desc">Higher = fewer spikes, more selective</p>
                 </div>
 
                 <div class="param-group">
                     <div class="param-header">
                         <span class="param-name">Leak Rate</span>
-                        <span class="param-value" id="leakVal">0.90</span>
+                        <span class="param-value" id="leakVal">0.92</span>
                     </div>
-                    <input type="range" class="param-slider" id="leak" min="0.7" max="0.99" step="0.01" value="0.90">
-                    <p class="param-desc">How fast voltage decays. Lower = faster forgetting</p>
+                    <input type="range" class="param-slider" id="leak" min="0.7" max="0.99" step="0.01" value="0.92">
+                    <p class="param-desc">How fast neurons forget (lower = faster)</p>
                 </div>
 
                 <div class="param-group">
                     <div class="param-header">
-                        <span class="param-name">Network Size</span>
-                        <span class="param-value" id="sizeVal">16</span>
+                        <span class="param-name">Processing Time</span>
+                        <span class="param-value" id="timeVal">60</span>
                     </div>
-                    <input type="range" class="param-slider" id="networkSize" min="8" max="32" step="4" value="16">
-                    <p class="param-desc">Neurons per layer. More = better patterns, slower</p>
+                    <input type="range" class="param-slider" id="timeSteps" min="30" max="100" step="10" value="60">
+                    <p class="param-desc">Longer = more accurate, slower</p>
+                </div>
+
+                <div class="param-group">
+                    <div class="param-header">
+                        <span class="param-name">Hidden Neurons</span>
+                        <span class="param-value" id="neuronsVal">24</span>
+                    </div>
+                    <input type="range" class="param-slider" id="neurons" min="12" max="48" step="4" value="24">
+                    <p class="param-desc">More neurons = better pattern detection</p>
                 </div>
             </div>
         </div>
 
         <!-- CENTER: Visualization -->
         <div class="center-section">
-            <!-- Flow Diagram -->
-            <div class="flow-diagram">
+            <!-- Flow Steps -->
+            <div class="flow-steps">
                 <div class="flow-step" id="step1">
-                    <div class="flow-step-icon">📥</div>
-                    <div class="flow-step-title">Encode</div>
-                    <div class="flow-step-desc">Input → Spikes</div>
+                    <span class="flow-step-icon">📥</span>
+                    <span class="flow-step-text">Encode</span>
                 </div>
-                <div class="flow-arrow" id="arrow1">→</div>
+                <span class="flow-arrow" id="arrow1">→</span>
                 <div class="flow-step" id="step2">
-                    <div class="flow-step-icon">⚡</div>
-                    <div class="flow-step-title">Process</div>
-                    <div class="flow-step-desc">Neurons Fire</div>
+                    <span class="flow-step-icon">⚡</span>
+                    <span class="flow-step-text">Spike</span>
                 </div>
-                <div class="flow-arrow" id="arrow2">→</div>
+                <span class="flow-arrow" id="arrow2">→</span>
                 <div class="flow-step" id="step3">
-                    <div class="flow-step-icon">📤</div>
-                    <div class="flow-step-title">Decode</div>
-                    <div class="flow-step-desc">Spikes → Result</div>
+                    <span class="flow-step-icon">🧠</span>
+                    <span class="flow-step-text">Process</span>
+                </div>
+                <span class="flow-arrow" id="arrow3">→</span>
+                <div class="flow-step" id="step4">
+                    <span class="flow-step-icon">📤</span>
+                    <span class="flow-step-text">Output</span>
                 </div>
             </div>
 
-            <!-- SPIKE VISUALIZATION -->
-            <div class="spike-display">
-                <div class="spike-display-title">
-                    🔥 Live Spike Activity
-                    <span style="margin-left: auto; font-size: 0.8rem; color: var(--text-dim);">
-                        Total: <span id="totalSpikes">0</span> spikes
-                    </span>
-                </div>
-                
-                <div class="spike-container" id="spikeContainer">
-                    <div class="spike-layer">
-                        <div class="spike-layer-label">Input</div>
-                        <div class="spike-track" id="track0"></div>
-                    </div>
-                    <div class="spike-layer">
-                        <div class="spike-layer-label">Hidden 1</div>
-                        <div class="spike-track" id="track1"></div>
-                    </div>
-                    <div class="spike-layer">
-                        <div class="spike-layer-label">Hidden 2</div>
-                        <div class="spike-track" id="track2"></div>
-                    </div>
-                    <div class="spike-layer">
-                        <div class="spike-layer-label">Output</div>
-                        <div class="spike-track" id="track3"></div>
+            <!-- Spike Visualization - SCROLLABLE -->
+            <div class="spike-section">
+                <div class="spike-header">
+                    <div class="spike-title">🔥 Spike Activity Timeline</div>
+                    <div class="spike-stats">
+                        <div class="spike-stat">Total: <span id="totalSpikes">0</span></div>
+                        <div class="spike-stat">Active: <span id="activeNeurons">0</span></div>
                     </div>
                 </div>
 
-                <div class="spike-legend">
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: var(--accent);"></div>
-                        Input Spikes
+                <div class="spike-scroll-container">
+                    <div class="spike-scroll-hint">← Drag to scroll →</div>
+                    <div class="spike-viewport" id="spikeViewport">
+                        <div class="spike-canvas-wrapper">
+                            <canvas class="spike-canvas" id="spikeCanvas" width="800" height="260"></canvas>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: var(--purple);"></div>
-                        Hidden Spikes
+                </div>
+
+                <div class="spike-controls">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" onclick="zoomSpikes(-1)">−</button>
+                        <span class="zoom-label" id="zoomLabel">100%</span>
+                        <button class="zoom-btn" onclick="zoomSpikes(1)">+</button>
+                        <button class="zoom-btn" onclick="scrollToEnd()" title="Go to end">→</button>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-dot" style="background: var(--success);"></div>
-                        Output Spikes
+                    <div class="spike-legend">
+                        <div class="legend-item">
+                            <div class="legend-bar" style="background: var(--accent);"></div>
+                            Input
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-bar" style="background: var(--purple);"></div>
+                            Hidden
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-bar" style="background: var(--success);"></div>
+                            Output
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- What Chip Sees -->
             <div class="chip-sees">
-                <div class="card-title">👁️ What The Chip Sees</div>
-                <div class="sees-grid">
-                    <div class="sees-panel">
-                        <div class="sees-panel-title">Your Input</div>
-                        <canvas class="sees-canvas" id="inputPreview" width="150" height="150"></canvas>
-                    </div>
-                    <div class="sees-panel">
-                        <div class="sees-panel-title">Encoded as Spikes</div>
-                        <canvas class="sees-canvas" id="encodedPreview" width="150" height="150"></canvas>
-                    </div>
+                <div class="sees-panel">
+                    <div class="sees-title">Your Drawing</div>
+                    <canvas class="sees-canvas" id="inputPreview" width="120" height="120"></canvas>
+                </div>
+                <div class="sees-panel">
+                    <div class="sees-title">Downsampled (8×8)</div>
+                    <canvas class="sees-canvas" id="downsampledPreview" width="120" height="120"></canvas>
+                </div>
+                <div class="sees-panel">
+                    <div class="sees-title">Spike Pattern</div>
+                    <canvas class="sees-canvas" id="spikePatternPreview" width="120" height="120"></canvas>
                 </div>
             </div>
         </div>
@@ -821,34 +943,44 @@
         <!-- RIGHT: Output -->
         <div class="output-section">
             <!-- Main Result -->
-            <div class="output-result">
-                <div class="card-title">📤 Chip Output</div>
-                
-                <div id="outputWaiting" class="output-waiting">
-                    <div class="output-waiting-icon">⏳</div>
-                    <p>Waiting for input...</p>
-                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Draw something or select a shape, then click "Process"</p>
+            <div class="result-card">
+                <div id="resultWaiting" class="result-waiting">
+                    <div class="result-waiting-icon">🧠</div>
+                    <p class="result-waiting-text">Draw something and click<br>"Process Through Chip"</p>
                 </div>
 
-                <div id="outputResult" class="result-display">
-                    <div class="result-icon" id="resultIcon">?</div>
-                    <div class="result-label" id="resultLabel">Unknown</div>
+                <div id="resultContent" class="result-content">
+                    <div class="result-detected">Detected</div>
+                    <div class="result-main" id="resultIcon">A</div>
+                    <div class="result-label" id="resultLabel">Letter A</div>
+                    <div class="result-type" id="resultType">LETTER</div>
+                    
                     <div class="result-confidence">
-                        Confidence: <strong id="resultConf">0%</strong>
+                        <div class="confidence-label">Confidence</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                        </div>
+                        <div class="confidence-value" id="confidenceValue">0%</div>
                     </div>
-                    <div class="result-bar">
-                        <div class="result-bar-fill" id="resultBarFill" style="width: 0%"></div>
-                    </div>
+
                     <div class="result-message" id="resultMessage">
-                        The chip detected a shape!
+                        Processing complete
                     </div>
                 </div>
             </div>
 
-            <!-- All Classes -->
-            <div class="all-classes">
-                <div class="card-title">📊 Output Neuron Activity</div>
-                <div id="classesContainer">
+            <!-- Category Tabs -->
+            <div class="card">
+                <div class="card-title">📊 Recognition Results</div>
+                
+                <div class="category-tabs">
+                    <button class="category-tab active" onclick="showCategory('all')">All</button>
+                    <button class="category-tab" onclick="showCategory('letters')">Letters</button>
+                    <button class="category-tab" onclick="showCategory('numbers')">Numbers</button>
+                    <button class="category-tab" onclick="showCategory('shapes')">Shapes</button>
+                </div>
+
+                <div id="matchesContainer">
                     <!-- Filled dynamically -->
                 </div>
             </div>
@@ -867,11 +999,11 @@
                     </div>
                     <div class="stat-box">
                         <div class="stat-value" id="statEnergy">0</div>
-                        <div class="stat-label">mW Energy</div>
+                        <div class="stat-label">Energy (mW)</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value" id="statTime">0</div>
-                        <div class="stat-label">ms Latency</div>
+                        <div class="stat-value" id="statLatency">0</div>
+                        <div class="stat-label">Latency (ms)</div>
                     </div>
                 </div>
             </div>
@@ -879,93 +1011,143 @@
     </div>
 
     <script>
+        // ============ RECOGNITION CLASSES ============
+        const recognitionClasses = [
+            // Letters
+            { id: 'A', icon: 'A', name: 'Letter A', type: 'letter', features: ['triangle', 'horizontal'] },
+            { id: 'B', icon: 'B', name: 'Letter B', type: 'letter', features: ['vertical', 'curves_right'] },
+            { id: 'C', icon: 'C', name: 'Letter C', type: 'letter', features: ['curve_left', 'open_right'] },
+            { id: 'D', icon: 'D', name: 'Letter D', type: 'letter', features: ['vertical', 'curve_right'] },
+            { id: 'E', icon: 'E', name: 'Letter E', type: 'letter', features: ['vertical', 'horizontal_multi'] },
+            { id: 'F', icon: 'F', name: 'Letter F', type: 'letter', features: ['vertical', 'horizontal_top'] },
+            { id: 'H', icon: 'H', name: 'Letter H', type: 'letter', features: ['vertical_dual', 'horizontal'] },
+            { id: 'I', icon: 'I', name: 'Letter I', type: 'letter', features: ['vertical_single'] },
+            { id: 'L', icon: 'L', name: 'Letter L', type: 'letter', features: ['vertical', 'horizontal_bottom'] },
+            { id: 'M', icon: 'M', name: 'Letter M', type: 'letter', features: ['vertical_dual', 'diagonal'] },
+            { id: 'N', icon: 'N', name: 'Letter N', type: 'letter', features: ['vertical_dual', 'diagonal'] },
+            { id: 'O', icon: 'O', name: 'Letter O', type: 'letter', features: ['closed_curve', 'circle'] },
+            { id: 'P', icon: 'P', name: 'Letter P', type: 'letter', features: ['vertical', 'curve_top'] },
+            { id: 'S', icon: 'S', name: 'Letter S', type: 'letter', features: ['curves_multi', 'no_straight'] },
+            { id: 'T', icon: 'T', name: 'Letter T', type: 'letter', features: ['vertical', 'horizontal_top'] },
+            { id: 'U', icon: 'U', name: 'Letter U', type: 'letter', features: ['curve_bottom', 'open_top'] },
+            { id: 'V', icon: 'V', name: 'Letter V', type: 'letter', features: ['diagonal_dual', 'point_bottom'] },
+            { id: 'W', icon: 'W', name: 'Letter W', type: 'letter', features: ['diagonal_multi'] },
+            { id: 'X', icon: 'X', name: 'Letter X', type: 'letter', features: ['diagonal_cross'] },
+            { id: 'Y', icon: 'Y', name: 'Letter Y', type: 'letter', features: ['diagonal_top', 'vertical_bottom'] },
+            { id: 'Z', icon: 'Z', name: 'Letter Z', type: 'letter', features: ['horizontal_dual', 'diagonal'] },
+            
+            // Numbers
+            { id: '0', icon: '0', name: 'Number 0', type: 'number', features: ['closed_curve', 'oval'] },
+            { id: '1', icon: '1', name: 'Number 1', type: 'number', features: ['vertical_single', 'minimal'] },
+            { id: '2', icon: '2', name: 'Number 2', type: 'number', features: ['curve_top', 'horizontal_bottom'] },
+            { id: '3', icon: '3', name: 'Number 3', type: 'number', features: ['curves_right', 'open_left'] },
+            { id: '4', icon: '4', name: 'Number 4', type: 'number', features: ['vertical', 'horizontal', 'diagonal'] },
+            { id: '5', icon: '5', name: 'Number 5', type: 'number', features: ['horizontal_top', 'curve_bottom'] },
+            { id: '6', icon: '6', name: 'Number 6', type: 'number', features: ['curve_full', 'loop_bottom'] },
+            { id: '7', icon: '7', name: 'Number 7', type: 'number', features: ['horizontal_top', 'diagonal'] },
+            { id: '8', icon: '8', name: 'Number 8', type: 'number', features: ['closed_curve', 'double_loop'] },
+            { id: '9', icon: '9', name: 'Number 9', type: 'number', features: ['loop_top', 'vertical_bottom'] },
+            
+            // Shapes
+            { id: 'circle', icon: '⭕', name: 'Circle', type: 'shape', features: ['closed_curve', 'circle', 'no_corners'] },
+            { id: 'square', icon: '⬜', name: 'Square', type: 'shape', features: ['four_corners', 'straight_lines'] },
+            { id: 'triangle', icon: '🔺', name: 'Triangle', type: 'shape', features: ['three_corners', 'diagonal'] },
+            { id: 'star', icon: '⭐', name: 'Star', type: 'shape', features: ['many_points', 'diagonal_multi'] },
+            { id: 'heart', icon: '❤️', name: 'Heart', type: 'shape', features: ['curves_top', 'point_bottom'] },
+            { id: 'cross', icon: '✚', name: 'Cross/Plus', type: 'shape', features: ['vertical', 'horizontal', 'cross'] },
+            { id: 'arrow', icon: '➡️', name: 'Arrow', type: 'shape', features: ['horizontal', 'triangle_end'] },
+            { id: 'line', icon: '➖', name: 'Line', type: 'shape', features: ['single_stroke', 'minimal'] }
+        ];
+
         // ============ STATE ============
         const state = {
-            inputType: 'draw',
-            selectedShape: null,
             isProcessing: false,
-            
-            // Parameters
             threshold: 1.0,
-            leak: 0.90,
-            networkSize: 16,
+            leak: 0.92,
+            timeSteps: 60,
+            hiddenNeurons: 24,
+            brushSize: 12,
+            
+            // Spike data
+            allSpikes: [],
+            totalSpikes: 0,
+            activeNeurons: 0,
+            
+            // Results
+            results: [],
+            
+            // Zoom
+            zoomLevel: 1,
             
             // Network
             layers: [],
             
-            // Stats
-            totalSpikes: 0,
-            activeNeurons: 0
+            // Current category filter
+            currentCategory: 'all'
         };
-
-        // Classes to detect
-        const classes = [
-            { id: 0, icon: '⭕', name: 'Circle', spikes: 0 },
-            { id: 1, icon: '⬜', name: 'Square', spikes: 0 },
-            { id: 2, icon: '🔺', name: 'Triangle', spikes: 0 },
-            { id: 3, icon: '⭐', name: 'Star', spikes: 0 },
-            { id: 4, icon: '❤️', name: 'Heart', spikes: 0 },
-            { id: 5, icon: '✖️', name: 'Cross', spikes: 0 }
-        ];
 
         // ============ CANVAS SETUP ============
         const drawCanvas = document.getElementById('drawCanvas');
         const drawCtx = drawCanvas.getContext('2d');
         const inputPreview = document.getElementById('inputPreview');
         const inputCtx = inputPreview.getContext('2d');
-        const encodedPreview = document.getElementById('encodedPreview');
-        const encodedCtx = encodedPreview.getContext('2d');
+        const downsampledPreview = document.getElementById('downsampledPreview');
+        const downsampledCtx = downsampledPreview.getContext('2d');
+        const spikePatternPreview = document.getElementById('spikePatternPreview');
+        const spikePatternCtx = spikePatternPreview.getContext('2d');
+        const spikeCanvas = document.getElementById('spikeCanvas');
+        const spikeCtx = spikeCanvas.getContext('2d');
+        const spikeViewport = document.getElementById('spikeViewport');
 
         let isDrawing = false;
         let lastX = 0, lastY = 0;
+        let hasDrawn = false;
 
-        // Drawing events
+        // Drawing
         drawCanvas.addEventListener('mousedown', (e) => {
             isDrawing = true;
-            [lastX, lastY] = [e.offsetX, e.offsetY];
+            [lastX, lastY] = getCanvasCoords(e);
+            document.getElementById('drawHint').classList.add('hidden');
+            hasDrawn = true;
         });
 
         drawCanvas.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
+            const [x, y] = getCanvasCoords(e);
             
             drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 12;
+            drawCtx.lineWidth = state.brushSize;
             drawCtx.lineCap = 'round';
             drawCtx.lineJoin = 'round';
             
             drawCtx.beginPath();
             drawCtx.moveTo(lastX, lastY);
-            drawCtx.lineTo(e.offsetX, e.offsetY);
+            drawCtx.lineTo(x, y);
             drawCtx.stroke();
             
-            [lastX, lastY] = [e.offsetX, e.offsetY];
+            [lastX, lastY] = [x, y];
             updateInputPreview();
         });
 
         drawCanvas.addEventListener('mouseup', () => isDrawing = false);
         drawCanvas.addEventListener('mouseout', () => isDrawing = false);
 
-        // Touch support
+        // Touch
         drawCanvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const rect = drawCanvas.getBoundingClientRect();
-            lastX = touch.clientX - rect.left;
-            lastY = touch.clientY - rect.top;
             isDrawing = true;
+            [lastX, lastY] = getTouchCoords(e);
+            document.getElementById('drawHint').classList.add('hidden');
+            hasDrawn = true;
         });
 
         drawCanvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
             if (!isDrawing) return;
-            
-            const touch = e.touches[0];
-            const rect = drawCanvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
+            const [x, y] = getTouchCoords(e);
             
             drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 12;
+            drawCtx.lineWidth = state.brushSize;
             drawCtx.lineCap = 'round';
             
             drawCtx.beginPath();
@@ -979,136 +1161,223 @@
 
         drawCanvas.addEventListener('touchend', () => isDrawing = false);
 
+        function getCanvasCoords(e) {
+            const rect = drawCanvas.getBoundingClientRect();
+            const scaleX = drawCanvas.width / rect.width;
+            const scaleY = drawCanvas.height / rect.height;
+            return [
+                (e.clientX - rect.left) * scaleX,
+                (e.clientY - rect.top) * scaleY
+            ];
+        }
+
+        function getTouchCoords(e) {
+            const touch = e.touches[0];
+            const rect = drawCanvas.getBoundingClientRect();
+            const scaleX = drawCanvas.width / rect.width;
+            const scaleY = drawCanvas.height / rect.height;
+            return [
+                (touch.clientX - rect.left) * scaleX,
+                (touch.clientY - rect.top) * scaleY
+            ];
+        }
+
+        // Brush size
+        document.getElementById('brushSize').addEventListener('input', (e) => {
+            state.brushSize = parseInt(e.target.value);
+            document.getElementById('brushPreview').style.width = state.brushSize + 'px';
+            document.getElementById('brushPreview').style.height = state.brushSize + 'px';
+        });
+
+        // ============ CANVAS CONTROLS ============
         function clearCanvas() {
             drawCtx.fillStyle = '#000';
             drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
-            updateInputPreview();
-            clearEncodedPreview();
+            hasDrawn = false;
+            document.getElementById('drawHint').classList.remove('hidden');
+            clearPreviews();
         }
 
-        function drawRandom() {
-            clearCanvas();
-            
-            const shapes = ['circle', 'square', 'triangle', 'star'];
-            const shape = shapes[Math.floor(Math.random() * shapes.length)];
-            
-            drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 12;
-            drawCtx.lineCap = 'round';
-            
-            const cx = 125, cy = 125;
-            
-            drawCtx.beginPath();
-            switch(shape) {
-                case 'circle':
-                    drawCtx.arc(cx, cy, 80, 0, Math.PI * 2);
-                    break;
-                case 'square':
-                    drawCtx.rect(45, 45, 160, 160);
-                    break;
-                case 'triangle':
-                    drawCtx.moveTo(125, 30);
-                    drawCtx.lineTo(220, 200);
-                    drawCtx.lineTo(30, 200);
-                    drawCtx.closePath();
-                    break;
-                case 'star':
-                    for (let i = 0; i < 5; i++) {
-                        const angle = (i * 4 * Math.PI / 5) - Math.PI / 2;
-                        const x = cx + Math.cos(angle) * 80;
-                        const y = cy + Math.sin(angle) * 80;
-                        if (i === 0) drawCtx.moveTo(x, y);
-                        else drawCtx.lineTo(x, y);
-                    }
-                    drawCtx.closePath();
-                    break;
-            }
-            drawCtx.stroke();
-            updateInputPreview();
+        function clearPreviews() {
+            inputCtx.fillStyle = '#000';
+            inputCtx.fillRect(0, 0, 120, 120);
+            downsampledCtx.fillStyle = '#000';
+            downsampledCtx.fillRect(0, 0, 120, 120);
+            spikePatternCtx.fillStyle = '#000';
+            spikePatternCtx.fillRect(0, 0, 120, 120);
         }
 
         function updateInputPreview() {
-            inputCtx.fillStyle = '#0a0a0f';
-            inputCtx.fillRect(0, 0, 150, 150);
-            inputCtx.drawImage(drawCanvas, 0, 0, 250, 250, 0, 0, 150, 150);
+            inputCtx.fillStyle = '#000';
+            inputCtx.fillRect(0, 0, 120, 120);
+            inputCtx.drawImage(drawCanvas, 0, 0, 300, 300, 0, 0, 120, 120);
         }
 
-        function clearEncodedPreview() {
-            encodedCtx.fillStyle = '#0a0a0f';
-            encodedCtx.fillRect(0, 0, 150, 150);
+        function drawExample(type) {
+            clearCanvas();
+            hasDrawn = true;
+            document.getElementById('drawHint').classList.add('hidden');
+            
+            drawCtx.strokeStyle = '#00d4ff';
+            drawCtx.lineWidth = 14;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
+            
+            const cx = 150, cy = 150;
+            
+            drawCtx.beginPath();
+            
+            if (type === 'letter') {
+                const letters = ['A', 'B', 'E', 'H', 'M', 'S'];
+                const letter = letters[Math.floor(Math.random() * letters.length)];
+                drawLetter(letter, cx, cy);
+            } else if (type === 'number') {
+                const num = Math.floor(Math.random() * 10);
+                drawNumber(num, cx, cy);
+            } else {
+                const shapes = ['circle', 'square', 'triangle', 'star'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                drawShape(shape, cx, cy);
+            }
+            
+            drawCtx.stroke();
+            updateInputPreview();
         }
 
-        // ============ INPUT TYPE ============
-        function setInputType(type) {
-            state.inputType = type;
-            
-            document.querySelectorAll('.input-tab').forEach(tab => {
-                tab.classList.toggle('active', tab.textContent.toLowerCase().includes(type));
-            });
-            
-            document.getElementById('drawMode').style.display = type === 'draw' ? 'block' : 'none';
-            document.getElementById('shapeMode').style.display = type === 'shape' ? 'block' : 'none';
-            
-            if (type === 'draw') {
-                clearCanvas();
+        function drawLetter(letter, cx, cy) {
+            const s = 80; // size
+            switch(letter) {
+                case 'A':
+                    drawCtx.moveTo(cx, cy - s);
+                    drawCtx.lineTo(cx - s * 0.6, cy + s);
+                    drawCtx.moveTo(cx, cy - s);
+                    drawCtx.lineTo(cx + s * 0.6, cy + s);
+                    drawCtx.moveTo(cx - s * 0.35, cy + s * 0.3);
+                    drawCtx.lineTo(cx + s * 0.35, cy + s * 0.3);
+                    break;
+                case 'B':
+                    drawCtx.moveTo(cx - s * 0.4, cy - s);
+                    drawCtx.lineTo(cx - s * 0.4, cy + s);
+                    drawCtx.moveTo(cx - s * 0.4, cy - s);
+                    drawCtx.bezierCurveTo(cx + s * 0.6, cy - s, cx + s * 0.6, cy, cx - s * 0.4, cy);
+                    drawCtx.bezierCurveTo(cx + s * 0.7, cy, cx + s * 0.7, cy + s, cx - s * 0.4, cy + s);
+                    break;
+                case 'E':
+                    drawCtx.moveTo(cx + s * 0.4, cy - s);
+                    drawCtx.lineTo(cx - s * 0.4, cy - s);
+                    drawCtx.lineTo(cx - s * 0.4, cy + s);
+                    drawCtx.lineTo(cx + s * 0.4, cy + s);
+                    drawCtx.moveTo(cx - s * 0.4, cy);
+                    drawCtx.lineTo(cx + s * 0.2, cy);
+                    break;
+                case 'H':
+                    drawCtx.moveTo(cx - s * 0.5, cy - s);
+                    drawCtx.lineTo(cx - s * 0.5, cy + s);
+                    drawCtx.moveTo(cx + s * 0.5, cy - s);
+                    drawCtx.lineTo(cx + s * 0.5, cy + s);
+                    drawCtx.moveTo(cx - s * 0.5, cy);
+                    drawCtx.lineTo(cx + s * 0.5, cy);
+                    break;
+                case 'M':
+                    drawCtx.moveTo(cx - s * 0.6, cy + s);
+                    drawCtx.lineTo(cx - s * 0.6, cy - s);
+                    drawCtx.lineTo(cx, cy + s * 0.3);
+                    drawCtx.lineTo(cx + s * 0.6, cy - s);
+                    drawCtx.lineTo(cx + s * 0.6, cy + s);
+                    break;
+                case 'S':
+                    drawCtx.moveTo(cx + s * 0.4, cy - s * 0.7);
+                    drawCtx.bezierCurveTo(cx - s * 0.6, cy - s * 1.2, cx - s * 0.8, cy - s * 0.2, cx, cy);
+                    drawCtx.bezierCurveTo(cx + s * 0.8, cy + s * 0.2, cx + s * 0.6, cy + s * 1.2, cx - s * 0.4, cy + s * 0.7);
+                    break;
             }
         }
 
-        function selectShape(shape) {
-            state.selectedShape = shape;
-            
-            document.querySelectorAll('.shape-btn').forEach(btn => {
-                btn.classList.toggle('selected', btn.dataset.shape === shape);
-            });
-            
-            // Draw shape on canvas
-            clearCanvas();
-            drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 12;
-            drawCtx.lineCap = 'round';
-            
-            const cx = 125, cy = 125;
-            drawCtx.beginPath();
-            
+        function drawNumber(num, cx, cy) {
+            const s = 80;
+            switch(num) {
+                case 0:
+                    drawCtx.ellipse(cx, cy, s * 0.5, s, 0, 0, Math.PI * 2);
+                    break;
+                case 1:
+                    drawCtx.moveTo(cx - s * 0.2, cy - s * 0.7);
+                    drawCtx.lineTo(cx, cy - s);
+                    drawCtx.lineTo(cx, cy + s);
+                    break;
+                case 2:
+                    drawCtx.moveTo(cx - s * 0.4, cy - s * 0.5);
+                    drawCtx.bezierCurveTo(cx - s * 0.4, cy - s * 1.2, cx + s * 0.6, cy - s * 1.2, cx + s * 0.4, cy - s * 0.3);
+                    drawCtx.lineTo(cx - s * 0.5, cy + s);
+                    drawCtx.lineTo(cx + s * 0.5, cy + s);
+                    break;
+                case 3:
+                    drawCtx.moveTo(cx - s * 0.4, cy - s * 0.8);
+                    drawCtx.bezierCurveTo(cx + s * 0.6, cy - s * 1.2, cx + s * 0.8, cy - s * 0.2, cx, cy);
+                    drawCtx.bezierCurveTo(cx + s * 0.8, cy + s * 0.2, cx + s * 0.6, cy + s * 1.2, cx - s * 0.4, cy + s * 0.8);
+                    break;
+                case 4:
+                    drawCtx.moveTo(cx + s * 0.3, cy + s);
+                    drawCtx.lineTo(cx + s * 0.3, cy - s);
+                    drawCtx.lineTo(cx - s * 0.5, cy + s * 0.3);
+                    drawCtx.lineTo(cx + s * 0.5, cy + s * 0.3);
+                    break;
+                case 5:
+                    drawCtx.moveTo(cx + s * 0.4, cy - s);
+                    drawCtx.lineTo(cx - s * 0.4, cy - s);
+                    drawCtx.lineTo(cx - s * 0.4, cy - s * 0.1);
+                    drawCtx.bezierCurveTo(cx + s * 0.6, cy - s * 0.3, cx + s * 0.8, cy + s * 0.8, cx - s * 0.3, cy + s);
+                    break;
+                case 6:
+                    drawCtx.moveTo(cx + s * 0.3, cy - s);
+                    drawCtx.bezierCurveTo(cx - s * 0.8, cy - s * 0.5, cx - s * 0.6, cy + s * 1.2, cx + s * 0.1, cy + s * 0.8);
+                    drawCtx.bezierCurveTo(cx + s * 0.6, cy + s * 0.5, cx + s * 0.5, cy - s * 0.1, cx - s * 0.1, cy + s * 0.1);
+                    break;
+                case 7:
+                    drawCtx.moveTo(cx - s * 0.5, cy - s);
+                    drawCtx.lineTo(cx + s * 0.5, cy - s);
+                    drawCtx.lineTo(cx - s * 0.2, cy + s);
+                    break;
+                case 8:
+                    drawCtx.moveTo(cx, cy);
+                    drawCtx.bezierCurveTo(cx - s * 0.6, cy - s * 0.2, cx - s * 0.5, cy - s * 1.1, cx, cy - s * 0.9);
+                    drawCtx.bezierCurveTo(cx + s * 0.5, cy - s * 1.1, cx + s * 0.6, cy - s * 0.2, cx, cy);
+                    drawCtx.bezierCurveTo(cx - s * 0.7, cy + s * 0.3, cx - s * 0.6, cy + s * 1.2, cx, cy + s);
+                    drawCtx.bezierCurveTo(cx + s * 0.6, cy + s * 1.2, cx + s * 0.7, cy + s * 0.3, cx, cy);
+                    break;
+                case 9:
+                    drawCtx.moveTo(cx - s * 0.3, cy + s);
+                    drawCtx.bezierCurveTo(cx + s * 0.8, cy + s * 0.5, cx + s * 0.6, cy - s * 1.2, cx - s * 0.1, cy - s * 0.8);
+                    drawCtx.bezierCurveTo(cx - s * 0.6, cy - s * 0.5, cx - s * 0.5, cy + s * 0.1, cx + s * 0.1, cy - s * 0.1);
+                    break;
+            }
+        }
+
+        function drawShape(shape, cx, cy) {
+            const s = 90;
             switch(shape) {
                 case 'circle':
-                    drawCtx.arc(cx, cy, 80, 0, Math.PI * 2);
+                    drawCtx.arc(cx, cy, s, 0, Math.PI * 2);
                     break;
                 case 'square':
-                    drawCtx.rect(45, 45, 160, 160);
+                    drawCtx.rect(cx - s, cy - s, s * 2, s * 2);
                     break;
                 case 'triangle':
-                    drawCtx.moveTo(125, 30);
-                    drawCtx.lineTo(220, 200);
-                    drawCtx.lineTo(30, 200);
+                    drawCtx.moveTo(cx, cy - s);
+                    drawCtx.lineTo(cx + s, cy + s * 0.8);
+                    drawCtx.lineTo(cx - s, cy + s * 0.8);
                     drawCtx.closePath();
                     break;
                 case 'star':
                     for (let i = 0; i < 5; i++) {
                         const angle = (i * 4 * Math.PI / 5) - Math.PI / 2;
-                        const x = cx + Math.cos(angle) * 80;
-                        const y = cy + Math.sin(angle) * 80;
+                        const x = cx + Math.cos(angle) * s;
+                        const y = cy + Math.sin(angle) * s;
                         if (i === 0) drawCtx.moveTo(x, y);
                         else drawCtx.lineTo(x, y);
                     }
                     drawCtx.closePath();
                     break;
-                case 'heart':
-                    drawCtx.moveTo(125, 180);
-                    drawCtx.bezierCurveTo(125, 180, 45, 120, 45, 80);
-                    drawCtx.bezierCurveTo(45, 40, 85, 30, 125, 70);
-                    drawCtx.bezierCurveTo(165, 30, 205, 40, 205, 80);
-                    drawCtx.bezierCurveTo(205, 120, 125, 180, 125, 180);
-                    break;
-                case 'cross':
-                    drawCtx.moveTo(125, 30);
-                    drawCtx.lineTo(125, 220);
-                    drawCtx.moveTo(30, 125);
-                    drawCtx.lineTo(220, 125);
-                    break;
             }
-            drawCtx.stroke();
-            updateInputPreview();
         }
 
         // ============ PARAMETERS ============
@@ -1122,50 +1391,65 @@
             document.getElementById('leakVal').textContent = state.leak.toFixed(2);
         });
 
-        document.getElementById('networkSize').addEventListener('input', (e) => {
-            state.networkSize = parseInt(e.target.value);
-            document.getElementById('sizeVal').textContent = state.networkSize;
+        document.getElementById('timeSteps').addEventListener('input', (e) => {
+            state.timeSteps = parseInt(e.target.value);
+            document.getElementById('timeVal').textContent = state.timeSteps;
         });
 
-        // ============ MAIN PROCESSING ============
-        async function processInput() {
-            if (state.isProcessing) return;
+        document.getElementById('neurons').addEventListener('input', (e) => {
+            state.hiddenNeurons = parseInt(e.target.value);
+            document.getElementById('neuronsVal').textContent = state.hiddenNeurons;
+        });
+
+        // ============ SPIKE VIEWPORT SCROLLING ============
+        let isDragging = false;
+        let startX, scrollLeft;
+
+        spikeViewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - spikeViewport.offsetLeft;
+            scrollLeft = spikeViewport.scrollLeft;
+            spikeViewport.style.cursor = 'grabbing';
+        });
+
+        spikeViewport.addEventListener('mouseleave', () => {
+            isDragging = false;
+            spikeViewport.style.cursor = 'grab';
+        });
+
+        spikeViewport.addEventListener('mouseup', () => {
+            isDragging = false;
+            spikeViewport.style.cursor = 'grab';
+        });
+
+        spikeViewport.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - spikeViewport.offsetLeft;
+            const walk = (x - startX) * 2;
+            spikeViewport.scrollLeft = scrollLeft - walk;
+        });
+
+        function zoomSpikes(dir) {
+            state.zoomLevel = Math.max(0.5, Math.min(3, state.zoomLevel + dir * 0.25));
+            document.getElementById('zoomLabel').textContent = Math.round(state.zoomLevel * 100) + '%';
             
-            state.isProcessing = true;
-            document.getElementById('processBtn').disabled = true;
-            
-            // Reset
-            state.totalSpikes = 0;
-            state.activeNeurons = 0;
-            clearSpikeTracks();
-            resetClasses();
-            resetSteps();
-            
-            // Get input data
-            const inputData = getInputData();
-            
-            // Initialize network
-            initNetwork();
-            
-            // STAGE 1: Encode
-            await encodeStage(inputData);
-            
-            // STAGE 2: Process
-            await processStage(inputData);
-            
-            // STAGE 3: Decode
-            await decodeStage();
-            
-            state.isProcessing = false;
-            document.getElementById('processBtn').disabled = false;
+            const newWidth = 800 * state.zoomLevel;
+            spikeCanvas.width = newWidth;
+            redrawSpikes();
         }
 
-        function getInputData() {
-            const imageData = drawCtx.getImageData(0, 0, 250, 250);
-            const data = [];
+        function scrollToEnd() {
+            spikeViewport.scrollLeft = spikeViewport.scrollWidth;
+        }
+
+        // ============ FEATURE EXTRACTION ============
+        function extractFeatures(imageData) {
             const gridSize = 8;
-            const cellSize = 250 / gridSize;
+            const cellSize = 300 / gridSize;
+            const grid = [];
             
+            // Create 8x8 grid
             for (let i = 0; i < gridSize; i++) {
                 for (let j = 0; j < gridSize; j++) {
                     let sum = 0;
@@ -1175,23 +1459,213 @@
                         for (let dx = 0; dx < cellSize; dx++) {
                             const px = Math.floor(j * cellSize + dx);
                             const py = Math.floor(i * cellSize + dy);
-                            const idx = (py * 250 + px) * 4;
+                            const idx = (py * 300 + px) * 4;
                             const brightness = (imageData.data[idx] + imageData.data[idx + 1] + imageData.data[idx + 2]) / 3;
                             sum += brightness;
                             count++;
                         }
                     }
                     
-                    data.push(sum / count / 255);
+                    grid.push(sum / count / 255);
                 }
             }
             
-            return data;
+            // Extract feature patterns
+            const features = {
+                grid: grid,
+                hasVertical: 0,
+                hasHorizontal: 0,
+                hasDiagonal: 0,
+                hasCurve: 0,
+                isClosed: 0,
+                centerMass: { x: 0, y: 0 },
+                density: 0,
+                aspectRatio: 1,
+                corners: 0
+            };
+            
+            // Analyze rows and columns
+            for (let i = 0; i < gridSize; i++) {
+                let rowSum = 0, colSum = 0;
+                for (let j = 0; j < gridSize; j++) {
+                    rowSum += grid[i * gridSize + j];
+                    colSum += grid[j * gridSize + i];
+                }
+                if (rowSum > 0.5) features.hasHorizontal++;
+                if (colSum > 0.5) features.hasVertical++;
+            }
+            
+            // Diagonals
+            let diag1 = 0, diag2 = 0;
+            for (let i = 0; i < gridSize; i++) {
+                diag1 += grid[i * gridSize + i];
+                diag2 += grid[i * gridSize + (gridSize - 1 - i)];
+            }
+            features.hasDiagonal = Math.max(diag1, diag2) / gridSize;
+            
+            // Center of mass
+            let totalMass = 0, massX = 0, massY = 0;
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const v = grid[i * gridSize + j];
+                    totalMass += v;
+                    massX += j * v;
+                    massY += i * v;
+                }
+            }
+            if (totalMass > 0) {
+                features.centerMass.x = massX / totalMass / gridSize;
+                features.centerMass.y = massY / totalMass / gridSize;
+            }
+            features.density = totalMass / (gridSize * gridSize);
+            
+            // Check if closed shape (edges have pixels, center might be empty)
+            const edgeSum = grid[0] + grid[7] + grid[56] + grid[63];
+            const centerSum = grid[27] + grid[28] + grid[35] + grid[36];
+            features.isClosed = edgeSum > 0.5 && centerSum < edgeSum ? 1 : 0;
+            
+            // Corner detection (simplified)
+            const corners = [
+                grid[0], grid[7], grid[56], grid[63],
+                grid[9], grid[14], grid[49], grid[54]
+            ];
+            features.corners = corners.filter(c => c > 0.3).length;
+            
+            return features;
         }
 
-        function initNetwork() {
+        function matchFeaturesToClass(features) {
+            const scores = [];
+            
+            recognitionClasses.forEach(cls => {
+                let score = 0;
+                
+                // Base score from grid similarity patterns
+                if (cls.type === 'shape') {
+                    if (cls.id === 'circle' && features.isClosed && features.hasDiagonal > 0.3) {
+                        score += 30;
+                    }
+                    if (cls.id === 'square' && features.corners >= 4 && features.hasHorizontal > 1) {
+                        score += 30;
+                    }
+                    if (cls.id === 'triangle' && features.corners >= 2 && features.hasDiagonal > 0.4) {
+                        score += 30;
+                    }
+                    if (cls.id === 'star' && features.corners >= 4 && features.hasDiagonal > 0.3) {
+                        score += 25;
+                    }
+                    if (cls.id === 'cross' && features.hasVertical > 2 && features.hasHorizontal > 2) {
+                        score += 30;
+                    }
+                    if (cls.id === 'line' && features.density < 0.15) {
+                        score += 20;
+                    }
+                }
+                
+                if (cls.type === 'letter') {
+                    // Letters typically have more structure
+                    if (features.density > 0.1 && features.density < 0.5) {
+                        score += 10;
+                    }
+                    
+                    // Specific letter patterns
+                    if (cls.id === 'A' && features.hasDiagonal > 0.3 && features.hasHorizontal >= 1) {
+                        score += 25;
+                    }
+                    if ((cls.id === 'E' || cls.id === 'F') && features.hasVertical >= 1 && features.hasHorizontal >= 2) {
+                        score += 25;
+                    }
+                    if (cls.id === 'H' && features.hasVertical >= 2 && features.hasHorizontal >= 1) {
+                        score += 25;
+                    }
+                    if ((cls.id === 'I' || cls.id === 'L' || cls.id === 'T') && features.hasVertical >= 1) {
+                        score += 20;
+                    }
+                    if (cls.id === 'O' && features.isClosed) {
+                        score += 25;
+                    }
+                    if ((cls.id === 'S' || cls.id === 'C') && features.hasCurve && !features.isClosed) {
+                        score += 20;
+                    }
+                    if ((cls.id === 'V' || cls.id === 'W') && features.hasDiagonal > 0.4) {
+                        score += 25;
+                    }
+                    if (cls.id === 'X' && features.hasDiagonal > 0.5) {
+                        score += 30;
+                    }
+                }
+                
+                if (cls.type === 'number') {
+                    if (cls.id === '0' && features.isClosed) {
+                        score += 25;
+                    }
+                    if (cls.id === '1' && features.hasVertical >= 1 && features.density < 0.15) {
+                        score += 25;
+                    }
+                    if (cls.id === '4' && features.hasVertical >= 1 && features.hasHorizontal >= 1) {
+                        score += 20;
+                    }
+                    if (cls.id === '7' && features.hasHorizontal >= 1 && features.hasDiagonal > 0.2) {
+                        score += 25;
+                    }
+                    if (cls.id === '8' && features.isClosed && features.density > 0.2) {
+                        score += 25;
+                    }
+                }
+                
+                // Add noise for variation
+                score += Math.random() * 15;
+                
+                scores.push({ ...cls, score: score, spikes: 0 });
+            });
+            
+            return scores;
+        }
+
+        // ============ MAIN PROCESSING ============
+        async function processInput() {
+            if (state.isProcessing || !hasDrawn) return;
+            
+            state.isProcessing = true;
+            document.getElementById('processBtn').disabled = true;
+            
+            // Reset
+            state.allSpikes = [];
+            state.totalSpikes = 0;
+            state.activeNeurons = 0;
+            state.results = [];
+            resetSteps();
+            clearSpikeCanvas();
+            
+            // Get image data and features
+            const imageData = drawCtx.getImageData(0, 0, 300, 300);
+            const features = extractFeatures(imageData);
+            
+            // Initialize scores
+            let scores = matchFeaturesToClass(features);
+            
+            // Init network
+            initNetwork(scores.length);
+            
+            // Stage 1: Encode
+            await encodeStage(features);
+            
+            // Stage 2: Spike generation
+            await spikeStage(features);
+            
+            // Stage 3: Process through network
+            scores = await processStage(features, scores);
+            
+            // Stage 4: Decode output
+            await decodeStage(scores);
+            
+            state.isProcessing = false;
+            document.getElementById('processBtn').disabled = false;
+        }
+
+        function initNetwork(outputSize) {
             state.layers = [];
-            const sizes = [64, state.networkSize, state.networkSize, 6];
+            const sizes = [64, state.hiddenNeurons, state.hiddenNeurons, outputSize];
             
             sizes.forEach(size => {
                 const layer = [];
@@ -1206,41 +1680,20 @@
             });
         }
 
-        // ============ STAGES ============
-        async function encodeStage(inputData) {
+        async function encodeStage(features) {
             setStepActive(1);
             
-            // Show encoded preview
-            encodedCtx.fillStyle = '#0a0a0f';
-            encodedCtx.fillRect(0, 0, 150, 150);
+            // Draw downsampled preview
+            downsampledCtx.fillStyle = '#000';
+            downsampledCtx.fillRect(0, 0, 120, 120);
             
-            const gridSize = 8;
-            const cellSize = 150 / gridSize;
-            
-            for (let t = 0; t < 30; t++) {
-                for (let i = 0; i < inputData.length; i++) {
-                    const row = Math.floor(i / gridSize);
-                    const col = i % gridSize;
-                    
-                    // Spike probability based on input value
-                    if (Math.random() < inputData[i] * 0.4) {
-                        state.totalSpikes++;
-                        
-                        // Add spike to track
-                        addSpike(0, t / 30);
-                        
-                        // Update encoded preview
-                        encodedCtx.fillStyle = `rgba(0, 212, 255, ${0.5 + Math.random() * 0.5})`;
-                        encodedCtx.fillRect(
-                            col * cellSize + 2,
-                            row * cellSize + 2,
-                            cellSize - 4,
-                            cellSize - 4
-                        );
-                    }
+            const cellSize = 120 / 8;
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const val = features.grid[i * 8 + j];
+                    downsampledCtx.fillStyle = `rgb(${Math.floor(val * 255)}, ${Math.floor(val * 255)}, ${Math.floor(val * 255)})`;
+                    downsampledCtx.fillRect(j * cellSize, i * cellSize, cellSize - 1, cellSize - 1);
                 }
-                
-                updateTotalSpikes();
                 await sleep(30);
             }
             
@@ -1248,10 +1701,42 @@
             await sleep(200);
         }
 
-        async function processStage(inputData) {
+        async function spikeStage(features) {
             setStepActive(2);
             
-            const timeSteps = 50;
+            // Draw spike pattern preview
+            spikePatternCtx.fillStyle = '#000';
+            spikePatternCtx.fillRect(0, 0, 120, 120);
+            
+            const cellSize = 120 / 8;
+            for (let t = 0; t < 20; t++) {
+                for (let i = 0; i < 64; i++) {
+                    if (Math.random() < features.grid[i] * 0.5) {
+                        const row = Math.floor(i / 8);
+                        const col = i % 8;
+                        
+                        // Add spike
+                        state.totalSpikes++;
+                        state.allSpikes.push({ layer: 0, time: t / 20 });
+                        
+                        // Update spike pattern preview
+                        spikePatternCtx.fillStyle = `rgba(0, 212, 255, ${0.3 + Math.random() * 0.7})`;
+                        spikePatternCtx.fillRect(col * cellSize, row * cellSize, cellSize - 1, cellSize - 1);
+                    }
+                }
+                
+                updateSpikeDisplay();
+                await sleep(40);
+            }
+            
+            setStepComplete(2);
+            await sleep(200);
+        }
+
+        async function processStage(features, scores) {
+            setStepActive(3);
+            
+            const timeSteps = state.timeSteps;
             
             for (let t = 0; t < timeSteps; t++) {
                 // Process each layer
@@ -1259,215 +1744,258 @@
                     const layer = state.layers[l];
                     
                     layer.forEach((neuron, nIdx) => {
-                        // Get input
                         let input = 0;
                         
                         if (l === 0) {
-                            // Input layer - from data
-                            if (nIdx < inputData.length) {
-                                input = inputData[nIdx] * 0.2;
+                            // Input from features
+                            if (nIdx < features.grid.length) {
+                                input = features.grid[nIdx] * 0.25;
                             }
                         } else {
-                            // Hidden/output - from previous layer
+                            // From previous layer
                             const prevLayer = state.layers[l - 1];
                             prevLayer.forEach(pn => {
-                                if (t - pn.lastSpike < 3 && Math.random() > 0.5) {
-                                    input += 0.15;
+                                if (t - pn.lastSpike < 3 && Math.random() > 0.4) {
+                                    input += 0.12;
                                 }
                             });
                         }
                         
                         // Add noise
-                        input += (Math.random() - 0.5) * 0.05;
+                        input += (Math.random() - 0.5) * 0.08;
                         
-                        // Update neuron (LIF model)
+                        // LIF update
                         neuron.voltage = neuron.voltage * state.leak + input;
                         
-                        // Check for spike
+                        // Spike?
                         if (neuron.voltage >= state.threshold) {
                             neuron.voltage = 0;
                             neuron.lastSpike = t;
                             neuron.spikeCount++;
                             state.totalSpikes++;
                             
-                            // Add visual spike (not input layer, already shown)
-                            if (l > 0) {
-                                const trackIdx = Math.min(l, 3);
-                                addSpike(trackIdx, t / timeSteps);
-                            }
+                            // Record spike
+                            const layerType = l === 0 ? 0 : (l === state.layers.length - 1 ? 3 : (l === 1 ? 1 : 2));
+                            state.allSpikes.push({ 
+                                layer: layerType, 
+                                time: t / timeSteps 
+                            });
                             
-                            // If output layer, add to class
-                            if (l === state.layers.length - 1 && nIdx < classes.length) {
-                                classes[nIdx].spikes++;
+                            // Output layer - add to scores
+                            if (l === state.layers.length - 1 && nIdx < scores.length) {
+                                scores[nIdx].spikes++;
                             }
                         }
                     });
                 }
                 
-                updateTotalSpikes();
-                updateStats();
-                await sleep(25);
+                // Update displays every few steps
+                if (t % 3 === 0) {
+                    updateSpikeDisplay();
+                    updateStats();
+                    await sleep(15);
+                }
             }
             
-            setStepComplete(2);
+            setStepComplete(3);
             await sleep(200);
+            
+            return scores;
         }
 
-        async function decodeStage() {
-            setStepActive(3);
+        async function decodeStage(scores) {
+            setStepActive(4);
             
-            // Find winner
-            let maxSpikes = 0;
-            let winnerId = 0;
-            
-            classes.forEach((cls, idx) => {
-                if (cls.spikes > maxSpikes) {
-                    maxSpikes = cls.spikes;
-                    winnerId = idx;
-                }
+            // Sort by combined score (feature match + spikes)
+            scores.forEach(s => {
+                s.totalScore = s.score + s.spikes * 2;
             });
+            scores.sort((a, b) => b.totalScore - a.totalScore);
             
-            const totalOutputSpikes = classes.reduce((sum, c) => sum + c.spikes, 0);
-            const confidence = totalOutputSpikes > 0 
-                ? Math.round((maxSpikes / totalOutputSpikes) * 100) 
-                : 50;
+            state.results = scores;
             
-            // Show result
-            document.getElementById('outputWaiting').style.display = 'none';
-            document.getElementById('outputResult').style.display = 'block';
-            document.getElementById('outputResult').classList.add('result-display');
+            // Display result
+            const winner = scores[0];
+            const totalSpikes = scores.reduce((sum, s) => sum + s.spikes, 0);
+            const confidence = Math.min(95, Math.round(50 + (winner.totalScore / (scores[1]?.totalScore || 1)) * 20));
             
-            const winner = classes[winnerId];
+            document.getElementById('resultWaiting').style.display = 'none';
+            document.getElementById('resultContent').classList.add('visible');
             
             document.getElementById('resultIcon').textContent = winner.icon;
             document.getElementById('resultLabel').textContent = winner.name;
-            document.getElementById('resultConf').textContent = confidence + '%';
-            document.getElementById('resultBarFill').style.width = confidence + '%';
-            document.getElementById('resultMessage').textContent = 
-                `The chip detected "${winner.name}" by analyzing ${state.totalSpikes} spike events through ${state.networkSize * 2} neurons.`;
+            document.getElementById('resultType').textContent = winner.type.toUpperCase();
+            document.getElementById('confidenceFill').style.width = confidence + '%';
+            document.getElementById('confidenceValue').textContent = confidence + '%';
             
-            // Show all classes
-            displayAllClasses(winnerId, totalOutputSpikes);
+            document.getElementById('resultMessage').innerHTML = 
+                `The neuromorphic chip processed your drawing through <strong>${state.hiddenNeurons * 2}</strong> neurons, 
+                generating <strong>${state.totalSpikes}</strong> spike events. 
+                It recognized this as "${winner.name}" based on pattern matching and neural activity.`;
             
-            // Final stats
+            // Display all matches
+            displayMatches(scores, totalSpikes);
             updateStats();
             
-            setStepComplete(3);
+            setStepComplete(4);
         }
 
-        // ============ VISUALIZATION ============
-        function addSpike(trackIdx, position) {
-            const track = document.getElementById(`track${trackIdx}`);
-            if (!track) return;
-            
-            const spike = document.createElement('div');
-            spike.className = 'spike';
-            
-            if (trackIdx === 0) spike.classList.add('input');
-            else if (trackIdx === 3) spike.classList.add('output');
-            else spike.classList.add('hidden');
-            
-            spike.style.left = `${position * 100}%`;
-            
-            // Random height variation
-            spike.style.height = `${30 + Math.random() * 20}px`;
-            
-            track.appendChild(spike);
-            
-            // Remove old spikes if too many
-            const spikes = track.querySelectorAll('.spike');
-            if (spikes.length > 100) {
-                spikes[0].remove();
-            }
-        }
-
-        function clearSpikeTracks() {
-            for (let i = 0; i < 4; i++) {
-                const track = document.getElementById(`track${i}`);
-                if (track) {
-                    track.innerHTML = '';
-                }
-            }
-        }
-
-        function displayAllClasses(winnerId, total) {
-            const container = document.getElementById('classesContainer');
+        function displayMatches(scores, totalSpikes) {
+            const container = document.getElementById('matchesContainer');
             container.innerHTML = '';
             
-            classes.forEach((cls, idx) => {
-                const pct = total > 0 ? Math.round((cls.spikes / total) * 100) : 0;
+            const filtered = state.currentCategory === 'all' 
+                ? scores.slice(0, 8) 
+                : scores.filter(s => s.type === state.currentCategory.slice(0, -1)).slice(0, 8);
+            
+            filtered.forEach((cls, idx) => {
+                const pct = totalSpikes > 0 ? Math.round((cls.spikes / totalSpikes) * 100) : 0;
                 
                 const row = document.createElement('div');
-                row.className = 'class-row' + (idx === winnerId ? ' winner' : '');
+                row.className = 'match-row' + (idx === 0 && state.currentCategory === 'all' ? ' winner' : '');
                 row.innerHTML = `
-                    <span class="class-icon">${cls.icon}</span>
-                    <span class="class-name">${cls.name}</span>
-                    <span class="class-spikes">${cls.spikes} spikes</span>
-                    <div class="class-bar">
-                        <div class="class-bar-fill" style="width: ${pct}%"></div>
+                    <div class="match-rank">${idx + 1}</div>
+                    <span class="match-icon">${cls.icon}</span>
+                    <div class="match-info">
+                        <div class="match-name">${cls.name}</div>
+                        <div class="match-type">${cls.type}</div>
+                    </div>
+                    <span class="match-spikes">${cls.spikes}</span>
+                    <div class="match-bar">
+                        <div class="match-bar-fill" style="width: ${Math.min(100, pct * 2)}%"></div>
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        function resetClasses() {
-            classes.forEach(c => c.spikes = 0);
-            document.getElementById('classesContainer').innerHTML = '';
-            document.getElementById('outputWaiting').style.display = 'block';
-            document.getElementById('outputResult').style.display = 'none';
-        }
-
-        function updateTotalSpikes() {
-            document.getElementById('totalSpikes').textContent = state.totalSpikes;
-        }
-
-        function updateStats() {
-            document.getElementById('statSpikes').textContent = state.totalSpikes;
+        function showCategory(category) {
+            state.currentCategory = category;
             
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent.toLowerCase() === category);
+            });
+            
+            if (state.results.length > 0) {
+                const totalSpikes = state.results.reduce((sum, s) => sum + s.spikes, 0);
+                displayMatches(state.results, totalSpikes);
+            }
+        }
+
+        // ============ SPIKE VISUALIZATION ============
+        function clearSpikeCanvas() {
+            spikeCtx.fillStyle = '#000';
+            spikeCtx.fillRect(0, 0, spikeCanvas.width, spikeCanvas.height);
+            drawSpikeGrid();
+        }
+
+        function drawSpikeGrid() {
+            const layerHeight = 65;
+            const labels = ['Input', 'Hidden 1', 'Hidden 2', 'Output'];
+            const colors = ['#00d4ff33', '#a855f733', '#a855f733', '#00ff8833'];
+            
+            spikeCtx.font = '11px sans-serif';
+            
+            for (let i = 0; i < 4; i++) {
+                const y = i * layerHeight;
+                
+                // Layer background
+                spikeCtx.fillStyle = colors[i];
+                spikeCtx.fillRect(0, y, spikeCanvas.width, layerHeight - 2);
+                
+                // Label
+                spikeCtx.fillStyle = '#666';
+                spikeCtx.fillText(labels[i], 5, y + 15);
+                
+                // Separator line
+                spikeCtx.strokeStyle = '#2a2a3a';
+                spikeCtx.beginPath();
+                spikeCtx.moveTo(0, y + layerHeight - 1);
+                spikeCtx.lineTo(spikeCanvas.width, y + layerHeight - 1);
+                spikeCtx.stroke();
+            }
+        }
+
+        function updateSpikeDisplay() {
+            clearSpikeCanvas();
+            
+            const colors = ['#00d4ff', '#a855f7', '#a855f7', '#00ff88'];
+            const layerHeight = 65;
+            
+            state.allSpikes.forEach(spike => {
+                const x = spike.time * (spikeCanvas.width - 60) + 55;
+                const y = spike.layer * layerHeight + 20;
+                
+                // Draw spike bar
+                spikeCtx.fillStyle = colors[spike.layer];
+                spikeCtx.shadowColor = colors[spike.layer];
+                spikeCtx.shadowBlur = 6;
+                
+                const height = 30 + Math.random() * 15;
+                spikeCtx.fillRect(x, y, 3, height);
+                
+                spikeCtx.shadowBlur = 0;
+            });
+            
+            document.getElementById('totalSpikes').textContent = state.totalSpikes;
+            
+            // Count active neurons
             let active = 0;
             state.layers.forEach(layer => {
                 layer.forEach(n => {
                     if (n.spikeCount > 0) active++;
                 });
             });
-            document.getElementById('statActive').textContent = active;
+            state.activeNeurons = active;
+            document.getElementById('activeNeurons').textContent = active;
+        }
+
+        function redrawSpikes() {
+            updateSpikeDisplay();
+        }
+
+        function updateStats() {
+            document.getElementById('statSpikes').textContent = state.totalSpikes;
+            document.getElementById('statActive').textContent = state.activeNeurons;
             
-            // Energy estimate
+            // Energy (sparse = efficient)
             const totalNeurons = state.layers.reduce((sum, l) => sum + l.length, 0);
-            const sparsity = 1 - (active / totalNeurons);
-            const energy = Math.round((1 - sparsity * 0.8) * 5);
+            const sparsity = 1 - (state.activeNeurons / Math.max(1, totalNeurons));
+            const energy = Math.round((1 - sparsity * 0.8) * 8);
             document.getElementById('statEnergy').textContent = energy;
             
             // Latency
-            document.getElementById('statTime').textContent = Math.round(50 * 0.5);
+            document.getElementById('statLatency').textContent = Math.round(state.timeSteps * 0.4);
         }
 
         // ============ STEP INDICATORS ============
         function setStepActive(step) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).classList.remove('active', 'complete');
+            }
             document.getElementById(`step${step}`).classList.add('active');
-            document.getElementById(`step${step}`).classList.remove('complete');
             
-            if (step > 1) {
-                document.getElementById(`arrow${step - 1}`).classList.add('active');
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`arrow${i}`).classList.toggle('active', i === step - 1);
             }
         }
 
         function setStepComplete(step) {
             document.getElementById(`step${step}`).classList.remove('active');
             document.getElementById(`step${step}`).classList.add('complete');
-            
-            if (step > 1) {
-                document.getElementById(`arrow${step - 1}`).classList.remove('active');
-            }
         }
 
         function resetSteps() {
-            for (let i = 1; i <= 3; i++) {
+            for (let i = 1; i <= 4; i++) {
                 document.getElementById(`step${i}`).classList.remove('active', 'complete');
             }
-            document.getElementById('arrow1').classList.remove('active');
-            document.getElementById('arrow2').classList.remove('active');
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`arrow${i}`).classList.remove('active');
+            }
+            
+            document.getElementById('resultWaiting').style.display = 'block';
+            document.getElementById('resultContent').classList.remove('visible');
+            document.getElementById('matchesContainer').innerHTML = '';
         }
 
         // ============ HELPERS ============
@@ -1477,7 +2005,8 @@
 
         // ============ INIT ============
         clearCanvas();
-        clearEncodedPreview();
+        clearPreviews();
+        clearSpikeCanvas();
     </script>
 </body>
 </html>
