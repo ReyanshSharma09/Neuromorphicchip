@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuromorphic Chip Workflow Simulator</title>
+    <title>Neuromorphic Chip Simulator</title>
     <style>
         * {
             margin: 0;
@@ -12,1842 +12,1903 @@
         }
 
         :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1f2937;
-            --bg-card: #161f2e;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-tertiary: #06b6d4;
-            --accent-success: #10b981;
-            --accent-warning: #f59e0b;
-            --accent-danger: #ef4444;
-            --text-primary: #f9fafb;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border-color: #374151;
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-input: #21262d;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-purple: #a371f7;
+            --text: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Animated background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
-            animation: bgPulse 20s ease-in-out infinite;
-        }
-
-        @keyframes bgPulse {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-5%, -5%) scale(1.1); }
+            line-height: 1.5;
         }
 
         /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            max-width: 1600px;
-            margin: 0 auto;
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
+            justify-content: space-between;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            font-size: 1.75rem;
         }
 
-        .logo-text h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-tertiary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo-text span {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 0.65rem 1.25rem;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
+        .logo h1 {
+            font-size: 1.25rem;
             font-weight: 600;
-            font-size: 0.9rem;
+        }
+
+        .logo span {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 400;
+        }
+
+        .header-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        .header-btn:hover {
+            filter: brightness(1.1);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border-color);
+        .header-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* Main Layout */
-        .main-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            min-height: calc(100vh - 60px);
         }
 
-        /* Workflow Stages */
-        .workflow-container {
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .sidebar-right {
+            border-right: none;
+            border-left: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Parameter Groups */
+        .param-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .param-group:last-child {
+            border-bottom: none;
+        }
+
+        .param-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .param-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .param-value {
+            font-size: 0.875rem;
+            color: var(--accent);
+            font-weight: 600;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .param-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--bg-input);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .param-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .param-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .param-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .param-select {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .param-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Center Area */
+        .center-area {
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             gap: 2rem;
         }
 
-        .workflow-stage {
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .workflow-stage:hover {
-            border-color: var(--accent-primary);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .workflow-stage.active {
-            border-color: var(--accent-success);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .stage-header {
-            padding: 1.5rem;
-            background: var(--bg-tertiary);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stage-title {
-            display: flex;
-            align-items: center;
+        /* Flow Container */
+        .flow-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
             gap: 1rem;
-        }
-
-        .stage-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            border-radius: 50%;
-            display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.1rem;
         }
 
-        .stage-title h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
+        @media (max-width: 900px) {
+            .flow-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
         }
 
-        .stage-status {
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .status-idle {
-            background: rgba(107, 114, 128, 0.2);
+        .flow-arrow {
             color: var(--text-muted);
+            font-size: 1.5rem;
+            text-align: center;
         }
 
-        .status-processing {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent-warning);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .status-complete {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-success);
+        .flow-arrow.active {
+            color: var(--accent);
+            animation: pulse 1s ease-in-out infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            50% { opacity: 0.5; }
         }
 
-        .stage-body {
-            padding: 1.5rem;
-        }
-
-        .stage-description {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .stage-visualization {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 1.5rem;
-            min-height: 200px;
-        }
-
-        /* Input Controls */
-        .input-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .control-group {
-            background: var(--bg-tertiary);
-            padding: 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .control-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .control-value {
-            float: right;
-            color: var(--accent-tertiary);
-            font-weight: 600;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 8px;
-            background: var(--bg-secondary);
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
-        }
-
-        select {
-            width: 100%;
-            padding: 0.65rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        /* Encoding Visualization */
-        .encoding-grid {
-            display: grid;
-            grid-template-columns: repeat(20, 1fr);
-            gap: 4px;
-            margin-top: 1rem;
-        }
-
-        .pixel {
-            aspect-ratio: 1;
-            background: var(--bg-tertiary);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .spike-train-display {
-            display: flex;
-            gap: 3px;
-            height: 60px;
-            align-items: flex-end;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-        }
-
-        .spike-bar {
-            flex: 1;
-            background: var(--accent-warning);
-            border-radius: 2px;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-        }
-
-        /* Neuron Grid */
-        .neuron-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .neuron-cell {
-            aspect-ratio: 1;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .neuron-cell.firing {
-            border-color: var(--accent-warning);
-            background: rgba(245, 158, 11, 0.2);
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
-            animation: neuronFire 0.5s ease;
-        }
-
-        @keyframes neuronFire {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .neuron-id {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            position: absolute;
-            top: 0.5rem;
-        }
-
-        .neuron-voltage {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--accent-tertiary);
-        }
-
-        .neuron-meter {
-            width: 80%;
-            height: 4px;
-            background: var(--bg-secondary);
-            border-radius: 2px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .neuron-meter-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-success) 0%, var(--accent-warning) 100%);
-            transition: width 0.3s ease;
-        }
-
-        /* Connection Canvas */
-        .connection-canvas {
-            position: relative;
-            width: 100%;
-            height: 300px;
-        }
-
-        canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-        }
-
-        /* Spike Router */
-        .spike-router {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .router-node {
-            background: var(--bg-tertiary);
-            padding: 1rem;
-            border-radius: 10px;
-            border: 2px solid var(--border-color);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .router-node.active {
-            border-color: var(--accent-warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
-
-        .router-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .router-count {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-tertiary);
-        }
-
-        /* STDP Visualization */
-        .stdp-demo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            padding: 2rem;
-            margin-top: 1rem;
-        }
-
-        .stdp-neuron {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .stdp-neuron:hover {
-            transform: scale(1.1);
-        }
-
-        .stdp-neuron.firing {
-            box-shadow: 0 0 30px var(--accent-warning);
-            animation: neuronFire 0.5s ease;
-        }
-
-        .stdp-synapse {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .synapse-arrow {
-            width: 100px;
-            height: 6px;
-            background: var(--border-color);
-            position: relative;
-            border-radius: 3px;
-            transition: all 0.3s ease;
-        }
-
-        .synapse-arrow::after {
-            content: '▶';
-            position: absolute;
-            right: -10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--border-color);
-            font-size: 1rem;
-        }
-
-        .synapse-arrow.strengthened {
-            background: var(--accent-success);
-            height: 10px;
-        }
-
-        .synapse-arrow.strengthened::after {
-            color: var(--accent-success);
-        }
-
-        .synapse-arrow.weakened {
-            background: var(--accent-danger);
-            height: 3px;
-        }
-
-        .synapse-arrow.weakened::after {
-            color: var(--accent-danger);
-        }
-
-        .synapse-weight {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        /* Output Display */
-        .output-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .output-class {
-            background: var(--bg-tertiary);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .output-class.winner {
-            border-color: var(--accent-success);
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .class-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .class-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .class-confidence {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--accent-tertiary);
-        }
-
-        .class-bar {
-            width: 100%;
-            height: 6px;
-            background: var(--bg-secondary);
-            border-radius: 3px;
-            margin-top: 0.5rem;
-            overflow: hidden;
-        }
-
-        .class-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-success) 100%);
-            transition: width 0.5s ease;
-        }
-
-        /* Stats Panel */
-        .stats-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 1.5rem;
+        /* Cards */
+        .card {
             background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 10px;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-tertiary) 0%, var(--accent-primary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
-
-        /* Comparison Table */
-        .comparison-section {
-            margin-top: 2rem;
-            padding: 2rem;
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        .comparison-section h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .comparison-table th {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .comparison-table td {
-            color: var(--text-primary);
-        }
-
-        .comparison-table .highlight {
-            color: var(--accent-success);
-            font-weight: 600;
-        }
-
-        .comparison-table .traditional {
-            color: var(--accent-danger);
-        }
-
-        /* Energy Meter */
-        .energy-comparison {
-            margin-top: 2rem;
-        }
-
-        .energy-bar-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .energy-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .energy-bar {
-            width: 100%;
-            height: 30px;
-            background: var(--bg-tertiary);
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .energy-bar-fill {
-            height: 100%;
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 1rem;
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .energy-bar-fill.gpu {
-            background: linear-gradient(90deg, var(--accent-danger) 0%, #dc2626 100%);
-        }
-
-        .energy-bar-fill.neuromorphic {
-            background: linear-gradient(90deg, var(--accent-success) 0%, var(--accent-tertiary) 100%);
-        }
-
-        /* Toast */
-        .toast-container {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .toast {
-            padding: 1rem 1.5rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.15);
+        }
+
+        .card-header {
+            padding: 1rem;
+            background: var(--bg-input);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            animation: slideIn 0.3s ease;
-            min-width: 250px;
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
-            }
+        .card-icon.green { background: var(--accent-green); }
+        .card-icon.orange { background: var(--accent-orange); }
+        .card-icon.purple { background: var(--accent-purple); }
 
-            .input-controls {
-                grid-template-columns: 1fr;
-            }
-
-            .neuron-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .stdp-demo {
-                flex-direction: column;
-            }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
+        .card-body {
+            padding: 1.25rem;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
+        /* Input Section */
+        .input-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-tab {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .input-tab:hover {
+            border-color: var(--accent);
+        }
+
+        .input-tab.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .draw-canvas {
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--bg-dark);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .canvas-btn {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .canvas-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .pattern-item {
+            aspect-ratio: 1;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pattern-item:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .pattern-item.selected {
+            border-color: var(--accent);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .number-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 2rem;
+            text-align: center;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Chip Visualization */
+        .chip-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .chip-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chip-layer-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chip-neurons {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 100%;
+        }
+
+        .chip-neuron {
+            width: 12px;
+            height: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .chip-neuron.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .chip-neuron.firing {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 12px var(--accent-orange);
+            animation: fire 0.3s ease;
+        }
+
+        @keyframes fire {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* Processing Stats */
+        .chip-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .chip-stat {
+            background: var(--bg-dark);
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chip-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .chip-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        /* Output Section */
+        .output-result {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .output-main {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .output-confidence {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .output-bar {
+            height: 8px;
+            background: var(--bg-dark);
             border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-primary);
+        .output-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-green));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .output-classes {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .output-class {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: var(--bg-dark);
+            border-radius: 6px;
+        }
+
+        .output-class.winner {
+            background: rgba(63, 185, 80, 0.15);
+            border: 1px solid var(--accent-green);
+        }
+
+        .output-class-icon {
+            font-size: 1.25rem;
+            width: 30px;
+            text-align: center;
+        }
+
+        .output-class-name {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .output-class-score {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .output-class-bar {
+            width: 60px;
+            height: 4px;
+            background: var(--bg-input);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .output-class-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        /* Timeline */
+        .timeline {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .timeline-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 120px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .timeline-layer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 25%;
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-layer:nth-child(1) { top: 0; }
+        .timeline-layer:nth-child(2) { top: 25%; }
+        .timeline-layer:nth-child(3) { top: 50%; }
+        .timeline-layer:nth-child(4) { top: 75%; border-bottom: none; }
+
+        .timeline-label {
+            position: absolute;
+            left: 0.5rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .spike-marker {
+            position: absolute;
+            width: 3px;
+            height: 60%;
+            background: var(--accent-orange);
+            border-radius: 1px;
+            animation: spikeIn 0.2s ease;
+        }
+
+        @keyframes spikeIn {
+            from { transform: scaleY(0); opacity: 0; }
+            to { transform: scaleY(1); opacity: 1; }
+        }
+
+        .timeline-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-box-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Status Indicator */
+        .status-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .status-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .status-dot.active {
+            background: var(--accent-orange);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .status-dot.complete {
+            background: var(--accent-green);
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .status-text.active {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .status-line {
+            width: 40px;
+            height: 2px;
+            background: var(--border);
+        }
+
+        .status-line.complete {
+            background: var(--accent-green);
+        }
+
+        /* Waiting State */
+        .waiting-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .waiting-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .waiting-text {
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 1200px) {
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .sidebar-right {
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
         }
     </style>
 </head>
 <body>
-    <div class="bg-animation"></div>
-
     <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">🧠</div>
-                <div class="logo-text">
-                    <h1>Neuromorphic Chip Workflow</h1>
-                    <span>Complete Pipeline: Input → Spikes → Processing → Output</span>
-                </div>
-            </div>
-            <div class="header-controls">
-                <button class="btn btn-secondary" onclick="resetWorkflow()">
-                    🔄 Reset
-                </button>
-                <button class="btn btn-primary" id="runBtn" onclick="runWorkflow()">
-                    ▶️ Run Complete Workflow
-                </button>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">🧠</span>
+            <div>
+                <h1>Neuromorphic Chip Simulator</h1>
+                <span>Input → Process → Output</span>
             </div>
         </div>
+        <button class="header-btn" id="processBtn" onclick="runProcessing()">
+            ▶ Process Input
+        </button>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-container">
-        <div class="workflow-container">
-            
-            <!-- Stage 1: Input Encoding -->
-            <div class="workflow-stage" id="stage1">
-                <div class="stage-header">
-                    <div class="stage-title">
-                        <div class="stage-number">1</div>
-                        <div>
-                            <h3>Input Encoding</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                                Convert sensory data into spike trains
-                            </p>
-                        </div>
-                    </div>
-                    <div class="stage-status status-idle" id="status1">Idle</div>
-                </div>
-                <div class="stage-body">
-                    <p class="stage-description">
-                        <strong>Main Function:</strong> Transform continuous analog signals (images, audio, sensor data) into discrete spike events. 
-                        The chip uses <strong>rate coding</strong> (higher values = more spikes) or <strong>temporal coding</strong> (precise timing encodes information).
-                    </p>
-                    
-                    <div class="input-controls">
-                        <div class="control-group">
-                            <label class="control-label">
-                                Input Signal Strength
-                                <span class="control-value" id="inputValue">50</span>
-                            </label>
-                            <input type="range" id="inputSignal" min="0" max="100" value="50">
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">Encoding Method</label>
-                            <select id="encodingMethod">
-                                <option value="rate">Rate Coding (frequency)</option>
-                                <option value="temporal">Temporal Coding (timing)</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">
-                                Noise Level
-                                <span class="control-value" id="noiseValue">10</span>
-                            </label>
-                            <input type="range" id="noiseLevel" min="0" max="50" value="10">
-                        </div>
-                    </div>
+    <div class="main-layout">
+        <!-- Left Sidebar - Parameters -->
+        <aside class="sidebar">
+            <div class="sidebar-title">
+                ⚙️ Chip Parameters
+            </div>
 
-                    <div class="stage-visualization">
-                        <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Input Pattern → Spike Train
-                        </h4>
-                        <div class="encoding-grid" id="encodingGrid"></div>
-                        <div class="spike-train-display" id="spikeTrainDisplay"></div>
-                    </div>
+            <div class="info-box">
+                <div class="info-box-title">💡 How Parameters Work</div>
+                <p>Adjust these to change how the chip processes your input. Each parameter affects neuron behavior and output accuracy.</p>
+            </div>
+
+            <!-- Neuron Model -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Neuron Model</span>
+                </div>
+                <select class="param-select" id="neuronModel">
+                    <option value="lif">LIF (Leaky Integrate-and-Fire)</option>
+                    <option value="if">IF (Integrate-and-Fire)</option>
+                    <option value="alif">ALIF (Adaptive LIF)</option>
+                </select>
+                <p class="param-desc" id="modelDesc">
+                    <strong>LIF:</strong> Neurons accumulate input and leak over time. Most common model - balances biology and efficiency.
+                </p>
+            </div>
+
+            <!-- Threshold -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Firing Threshold</span>
+                    <span class="param-value" id="thresholdVal">1.0</span>
+                </div>
+                <input type="range" class="param-slider" id="threshold" min="0.5" max="2.0" step="0.1" value="1.0">
+                <p class="param-desc">
+                    <strong>Effect:</strong> Higher = neurons need more input to fire. Lower = more sensitive, more spikes generated.
+                </p>
+            </div>
+
+            <!-- Leak Rate -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Leak Rate (τ)</span>
+                    <span class="param-value" id="leakVal">0.95</span>
+                </div>
+                <input type="range" class="param-slider" id="leak" min="0.80" max="0.99" step="0.01" value="0.95">
+                <p class="param-desc">
+                    <strong>Effect:</strong> How fast voltage decays. Higher = longer memory. Lower = faster forgetting, needs constant input.
+                </p>
+            </div>
+
+            <!-- Time Steps -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Time Steps</span>
+                    <span class="param-value" id="stepsVal">50</span>
+                </div>
+                <input type="range" class="param-slider" id="timeSteps" min="20" max="100" step="10" value="50">
+                <p class="param-desc">
+                    <strong>Effect:</strong> Processing duration. More steps = more accurate but slower. Fewer = faster but may miss patterns.
+                </p>
+            </div>
+
+            <!-- Network Size -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Hidden Neurons</span>
+                    <span class="param-value" id="neuronsVal">16</span>
+                </div>
+                <input type="range" class="param-slider" id="hiddenNeurons" min="8" max="32" step="4" value="16">
+                <p class="param-desc">
+                    <strong>Effect:</strong> More neurons = better pattern recognition. Fewer = faster, less energy, simpler patterns.
+                </p>
+            </div>
+
+            <!-- Encoding -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Spike Encoding</span>
+                </div>
+                <select class="param-select" id="encoding">
+                    <option value="rate">Rate Coding</option>
+                    <option value="temporal">Temporal Coding</option>
+                </select>
+                <p class="param-desc" id="encodingDesc">
+                    <strong>Rate:</strong> Input intensity = spike frequency. Simple and robust for most tasks.
+                </p>
+            </div>
+
+            <!-- Noise -->
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Noise Level</span>
+                    <span class="param-value" id="noiseVal">5%</span>
+                </div>
+                <input type="range" class="param-slider" id="noise" min="0" max="20" step="1" value="5">
+                <p class="param-desc">
+                    <strong>Effect:</strong> Simulates real-world signal noise. Higher = more realistic but harder classification.
+                </p>
+            </div>
+        </aside>
+
+        <!-- Center - Main Visualization -->
+        <main class="center-area">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-step">
+                    <div class="status-dot" id="statusDot1"></div>
+                    <span class="status-text" id="statusText1">Encode</span>
+                </div>
+                <div class="status-line" id="statusLine1"></div>
+                <div class="status-step">
+                    <div class="status-dot" id="statusDot2"></div>
+                    <span class="status-text" id="statusText2">Process</span>
+                </div>
+                <div class="status-line" id="statusLine2"></div>
+                <div class="status-step">
+                    <div class="status-dot" id="statusDot3"></div>
+                    <span class="status-text" id="statusText3">Decode</span>
                 </div>
             </div>
 
-            <!-- Stage 2: Neuron State Update -->
-            <div class="workflow-stage" id="stage2">
-                <div class="stage-header">
-                    <div class="stage-title">
-                        <div class="stage-number">2</div>
+            <!-- Main Flow -->
+            <div class="flow-container">
+                <!-- INPUT -->
+                <div class="card" id="inputCard">
+                    <div class="card-header">
+                        <div class="card-icon">📥</div>
                         <div>
-                            <h3>Neuron State Update</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                                Integrate incoming spikes and update membrane potential
-                            </p>
+                            <div class="card-title">INPUT</div>
+                            <div class="card-subtitle">Provide data to process</div>
                         </div>
                     </div>
-                    <div class="stage-status status-idle" id="status2">Idle</div>
-                </div>
-                <div class="stage-body">
-                    <p class="stage-description">
-                        <strong>Main Function:</strong> Each neuron accumulates weighted inputs from synapses, maintains membrane voltage with leak dynamics (LIF model), 
-                        and fires a spike when threshold is reached. Hardware implements this via specialized circuits or efficient digital cores.
-                    </p>
+                    <div class="card-body">
+                        <div class="input-tabs">
+                            <button class="input-tab active" data-type="draw" onclick="switchInputType('draw')">✏️ Draw</button>
+                            <button class="input-tab" data-type="pattern" onclick="switchInputType('pattern')">🔷 Pattern</button>
+                            <button class="input-tab" data-type="number" onclick="switchInputType('number')">🔢 Number</button>
+                        </div>
 
-                    <div class="input-controls">
-                        <div class="control-group">
-                            <label class="control-label">Neuron Model</label>
-                            <select id="neuronModel">
-                                <option value="lif">LIF (Leaky Integrate-and-Fire)</option>
-                                <option value="if">IF (Perfect Integration)</option>
-                                <option value="alif">ALIF (Adaptive)</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">
-                                Threshold
-                                <span class="control-value" id="thresholdValue">1.0</span>
-                            </label>
-                            <input type="range" id="threshold" min="0.5" max="2" step="0.1" value="1">
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">
-                                Leak Rate
-                                <span class="control-value" id="leakValue">0.95</span>
-                            </label>
-                            <input type="range" id="leakRate" min="0.8" max="0.99" step="0.01" value="0.95">
-                        </div>
-                    </div>
-
-                    <div class="stage-visualization">
-                        <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Neuron Layer (8 neurons)
-                        </h4>
-                        <div class="neuron-grid" id="neuronGrid"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stage 3: Event Routing -->
-            <div class="workflow-stage" id="stage3">
-                <div class="stage-header">
-                    <div class="stage-title">
-                        <div class="stage-number">3</div>
-                        <div>
-                            <h3>Event-Driven Spike Routing</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                                Route spike events through synaptic connections
-                            </p>
-                        </div>
-                    </div>
-                    <div class="stage-status status-idle" id="status3">Idle</div>
-                </div>
-                <div class="stage-body">
-                    <p class="stage-description">
-                        <strong>Main Function:</strong> When neurons fire, spike events are routed through a Network-on-Chip (NoC) to target neurons. 
-                        Computation happens <strong>only when spikes occur</strong>, dramatically reducing energy compared to continuous processing.
-                        Synaptic weights and delays are applied during routing.
-                    </p>
-
-                    <div class="stage-visualization">
-                        <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Synaptic Network (Layer 1 → Layer 2)
-                        </h4>
-                        <div class="connection-canvas">
-                            <canvas id="connectionCanvas" width="800" height="300"></canvas>
-                        </div>
-                        <div class="spike-router" style="margin-top: 1.5rem;">
-                            <div class="router-node" id="routerInput">
-                                <div class="router-label">Input Spikes</div>
-                                <div class="router-count" id="routerInputCount">0</div>
-                            </div>
-                            <div class="router-node" id="routerProcessing">
-                                <div class="router-label">Processing</div>
-                                <div class="router-count" id="routerProcessingCount">0</div>
-                            </div>
-                            <div class="router-node" id="routerOutput">
-                                <div class="router-label">Output Spikes</div>
-                                <div class="router-count" id="routerOutputCount">0</div>
+                        <!-- Draw Input -->
+                        <div id="drawInput">
+                            <canvas class="draw-canvas" id="drawCanvas" width="200" height="200"></canvas>
+                            <div class="canvas-controls">
+                                <button class="canvas-btn" onclick="clearCanvas()">🗑️ Clear</button>
+                                <button class="canvas-btn" onclick="randomDraw()">🎲 Random</button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Stage 4: Learning (STDP) -->
-            <div class="workflow-stage" id="stage4">
-                <div class="stage-header">
-                    <div class="stage-title">
-                        <div class="stage-number">4</div>
-                        <div>
-                            <h3>On-Chip Learning (STDP)</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                                Spike-timing dependent plasticity updates weights
-                            </p>
-                        </div>
-                    </div>
-                    <div class="stage-status status-idle" id="status4">Idle</div>
-                </div>
-                <div class="stage-body">
-                    <p class="stage-description">
-                        <strong>Main Function:</strong> Synaptic weights adapt based on spike timing. If pre-synaptic neuron fires before post-synaptic, 
-                        the connection <span style="color: var(--accent-success);">strengthens</span>. If after, it 
-                        <span style="color: var(--accent-danger);">weakens</span>. This local learning rule runs continuously on-chip without external training.
-                    </p>
-
-                    <div class="input-controls">
-                        <div class="control-group">
-                            <label class="control-label">STDP Learning Rate</label>
-                            <select id="stdpRate">
-                                <option value="0.01">Slow (0.01)</option>
-                                <option value="0.05" selected>Medium (0.05)</option>
-                                <option value="0.1">Fast (0.1)</option>
-                            </select>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label">
-                                Window Size (ms)
-                                <span class="control-value" id="windowValue">20</span>
-                            </label>
-                            <input type="range" id="stdpWindow" min="10" max="50" value="20">
-                        </div>
-                    </div>
-
-                    <div class="stage-visualization">
-                        <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; text-align: center;">
-                            Click neurons to fire them and observe weight changes
-                        </h4>
-                        <div class="stdp-demo">
-                            <div class="stdp-neuron" id="preNeuron" onclick="firePreNeuron()">A</div>
-                            <div class="stdp-synapse">
-                                <div class="synapse-arrow" id="synapseArrow"></div>
-                                <div class="synapse-weight">
-                                    Weight: <span id="synapseWeight">1.00</span>
-                                </div>
+                        <!-- Pattern Input -->
+                        <div id="patternInput" style="display: none;">
+                            <div class="pattern-grid">
+                                <div class="pattern-item" data-pattern="circle" onclick="selectPattern('circle')">⭕</div>
+                                <div class="pattern-item" data-pattern="square" onclick="selectPattern('square')">⬜</div>
+                                <div class="pattern-item" data-pattern="triangle" onclick="selectPattern('triangle')">🔺</div>
+                                <div class="pattern-item" data-pattern="star" onclick="selectPattern('star')">⭐</div>
+                                <div class="pattern-item" data-pattern="heart" onclick="selectPattern('heart')">❤️</div>
+                                <div class="pattern-item" data-pattern="cross" onclick="selectPattern('cross')">✚</div>
+                                <div class="pattern-item" data-pattern="diamond" onclick="selectPattern('diamond')">💎</div>
+                                <div class="pattern-item" data-pattern="moon" onclick="selectPattern('moon')">🌙</div>
                             </div>
-                            <div class="stdp-neuron" id="postNeuron" onclick="firePostNeuron()">B</div>
                         </div>
-                        <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                            <p><strong>Rule:</strong> If A fires before B (within window) → strengthen connection</p>
-                            <p>If A fires after B → weaken connection</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Stage 5: Output Decoding -->
-            <div class="workflow-stage" id="stage5">
-                <div class="stage-header">
-                    <div class="stage-title">
-                        <div class="stage-number">5</div>
-                        <div>
-                            <h3>Output Decoding & Decision</h3>
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-                                Interpret spike patterns to produce classification
+                        <!-- Number Input -->
+                        <div id="numberInput" style="display: none;">
+                            <input type="number" class="number-input" id="numInput" placeholder="0-9" min="0" max="9" value="5">
+                            <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+                                Enter a digit (0-9) to classify
                             </p>
                         </div>
                     </div>
-                    <div class="stage-status status-idle" id="status5">Idle</div>
                 </div>
-                <div class="stage-body">
-                    <p class="stage-description">
-                        <strong>Main Function:</strong> Output neuron spike rates are decoded into actionable results. 
-                        For classification: count spikes per output neuron, highest spike rate = predicted class. 
-                        For control: spike timing maps to motor commands. Results feed to external systems or actuators.
-                    </p>
 
-                    <div class="stage-visualization">
-                        <h4 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                            Output Classification (4 classes)
-                        </h4>
-                        <div class="output-grid" id="outputGrid"></div>
+                <div class="flow-arrow" id="arrow1">→</div>
+
+                <!-- CHIP PROCESSING -->
+                <div class="card" id="chipCard">
+                    <div class="card-header">
+                        <div class="card-icon orange">⚡</div>
+                        <div>
+                            <div class="card-title">NEUROMORPHIC CHIP</div>
+                            <div class="card-subtitle">Spiking neural network</div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Statistics Panel -->
-        <div class="stats-panel">
-            <div class="stat-item">
-                <div class="stat-value" id="totalSpikes">0</div>
-                <div class="stat-label">Total Spikes</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="activeNeurons">0</div>
-                <div class="stat-label">Active Neurons</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="avgWeight">1.00</div>
-                <div class="stat-label">Avg. Syn. Weight</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="energySaved">0%</div>
-                <div class="stat-label">Energy Saved</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="latency">0</div>
-                <div class="stat-label">Latency (ms)</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="prediction">-</div>
-                <div class="stat-label">Prediction</div>
-            </div>
-        </div>
-
-        <!-- Energy Comparison -->
-        <div class="comparison-section">
-            <h2>⚡ Energy Efficiency: Neuromorphic vs Traditional</h2>
-            <div class="energy-comparison">
-                <div class="energy-bar-container">
-                    <div class="energy-label">
-                        <span>Traditional GPU/CPU (Dense Computation)</span>
-                        <span style="color: var(--accent-danger); font-weight: 600;" id="gpuEnergy">100 mW</span>
-                    </div>
-                    <div class="energy-bar">
-                        <div class="energy-bar-fill gpu" style="width: 100%;">Always Active</div>
+                    <div class="card-body">
+                        <div class="chip-container" id="chipContainer">
+                            <canvas id="chipCanvas" width="300" height="300"></canvas>
+                        </div>
+                        <div class="chip-stats">
+                            <div class="chip-stat">
+                                <div class="chip-stat-value" id="spikeCount">0</div>
+                                <div class="chip-stat-label">Spikes</div>
+                            </div>
+                            <div class="chip-stat">
+                                <div class="chip-stat-value" id="activeCount">0</div>
+                                <div class="chip-stat-label">Active Neurons</div>
+                            </div>
+                            <div class="chip-stat">
+                                <div class="chip-stat-value" id="energyVal">0 mW</div>
+                                <div class="chip-stat-label">Energy</div>
+                            </div>
+                            <div class="chip-stat">
+                                <div class="chip-stat-value" id="latencyVal">0 ms</div>
+                                <div class="chip-stat-label">Latency</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="energy-bar-container">
-                    <div class="energy-label">
-                        <span>Neuromorphic Chip (Event-Driven)</span>
-                        <span style="color: var(--accent-success); font-weight: 600;" id="neuroEnergy">8 mW</span>
+
+                <div class="flow-arrow" id="arrow2">→</div>
+
+                <!-- OUTPUT -->
+                <div class="card" id="outputCard">
+                    <div class="card-header">
+                        <div class="card-icon green">📤</div>
+                        <div>
+                            <div class="card-title">OUTPUT</div>
+                            <div class="card-subtitle">Classification result</div>
+                        </div>
                     </div>
-                    <div class="energy-bar">
-                        <div class="energy-bar-fill neuromorphic" id="neuroEnergyBar" style="width: 8%;">
-                            Sparse Activity
+                    <div class="card-body">
+                        <div id="outputWaiting" class="waiting-state">
+                            <div class="waiting-icon">⏳</div>
+                            <div class="waiting-text">Waiting for input processing...</div>
+                        </div>
+                        <div id="outputResult" class="output-result" style="display: none;">
+                            <div class="output-main" id="outputMain">?</div>
+                            <div class="output-confidence">Confidence: <span id="outputConf">0%</span></div>
+                            <div class="output-bar">
+                                <div class="output-bar-fill" id="outputBarFill" style="width: 0%"></div>
+                            </div>
+                            <div class="output-classes" id="outputClasses"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <p style="margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; text-align: center;">
-                Neuromorphic chips achieve <strong>10-100x energy efficiency</strong> by computing only when spikes occur, 
-                unlike traditional systems that continuously process all activations.
-            </p>
-        </div>
 
-        <!-- Comparison Table -->
-        <div class="comparison-section">
-            <h2>🆚 Architecture Comparison</h2>
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Traditional Neural Network</th>
-                        <th>Neuromorphic Chip</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Signal Type</strong></td>
-                        <td class="traditional">Continuous values (floats)</td>
-                        <td class="highlight">Discrete spikes (events)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Computation</strong></td>
-                        <td class="traditional">Always active (full layers)</td>
-                        <td class="highlight">Event-driven (sparse)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Memory Access</strong></td>
-                        <td class="traditional">Separate (Von Neumann)</td>
-                        <td class="highlight">Co-located (in-memory)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Learning</strong></td>
-                        <td class="traditional">Offline (backpropagation)</td>
-                        <td class="highlight">Online (STDP, local rules)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Time Handling</strong></td>
-                        <td class="traditional">Implicit/ignored</td>
-                        <td class="highlight">Explicit (spike timing)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Energy Efficiency</strong></td>
-                        <td class="traditional">~100 mW - 10 W</td>
-                        <td class="highlight">~1-100 mW</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Best For</strong></td>
-                        <td class="traditional">Large-scale training, vision</td>
-                        <td class="highlight">Edge sensing, robotics, real-time</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Hardware Examples</strong></td>
-                        <td class="traditional">NVIDIA GPU, Google TPU</td>
-                        <td class="highlight">Intel Loihi, IBM TrueNorth</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+            <!-- Spike Timeline -->
+            <div class="timeline">
+                <div class="timeline-title">
+                    📊 Spike Activity Timeline
+                </div>
+                <div class="timeline-track" id="timelineTrack">
+                    <div class="timeline-layer" id="layer0">
+                        <span class="timeline-label">Input</span>
+                    </div>
+                    <div class="timeline-layer" id="layer1">
+                        <span class="timeline-label">Hidden 1</span>
+                    </div>
+                    <div class="timeline-layer" id="layer2">
+                        <span class="timeline-label">Hidden 2</span>
+                    </div>
+                    <div class="timeline-layer" id="layer3">
+                        <span class="timeline-label">Output</span>
+                    </div>
+                </div>
+                <div class="timeline-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: var(--accent-orange)"></div>
+                        <span>Spike Event</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: var(--accent)"></div>
+                        <span>Active Period</span>
+                    </div>
+                </div>
+            </div>
+        </main>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
+        <!-- Right Sidebar - Explanation -->
+        <aside class="sidebar sidebar-right">
+            <div class="sidebar-title">
+                📚 What's Happening
+            </div>
+
+            <div class="info-box" id="stageExplanation">
+                <div class="info-box-title">🎯 Ready to Process</div>
+                <p>Click "Process Input" to see how a neuromorphic chip converts your input into spikes, processes them through neurons, and produces a classification output.</p>
+            </div>
+
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">Current Stage</span>
+                </div>
+                <p class="param-desc" id="currentStageDesc" style="font-size: 0.85rem; color: var(--text);">
+                    Idle - awaiting input
+                </p>
+            </div>
+
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">🔄 Processing Flow</span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.8;">
+                    <div><strong>1. Encode:</strong> Input → Spike train</div>
+                    <div><strong>2. Propagate:</strong> Spikes flow through layers</div>
+                    <div><strong>3. Integrate:</strong> Neurons accumulate charge</div>
+                    <div><strong>4. Fire:</strong> Threshold reached → spike!</div>
+                    <div><strong>5. Decode:</strong> Count output spikes → class</div>
+                </div>
+            </div>
+
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">⚡ Why Spikes?</span>
+                </div>
+                <p class="param-desc" style="font-size: 0.8rem;">
+                    Unlike traditional AI that computes continuously, neuromorphic chips only compute when spikes occur. This <strong>event-driven</strong> approach uses <strong>10-100x less energy</strong> - perfect for edge devices and real-time sensing.
+                </p>
+            </div>
+
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">🧬 vs Traditional NN</span>
+                </div>
+                <table style="width: 100%; font-size: 0.75rem; color: var(--text-secondary);">
+                    <tr>
+                        <td style="padding: 0.25rem 0;">Signal</td>
+                        <td style="color: var(--accent-red);">Continuous</td>
+                        <td style="color: var(--accent-green);">Spikes</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.25rem 0;">Compute</td>
+                        <td style="color: var(--accent-red);">Always on</td>
+                        <td style="color: var(--accent-green);">On events</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.25rem 0;">Energy</td>
+                        <td style="color: var(--accent-red);">~100W</td>
+                        <td style="color: var(--accent-green);">~1mW</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="param-group">
+                <div class="param-label">
+                    <span class="param-name">🔧 Real Hardware</span>
+                </div>
+                <p class="param-desc" style="font-size: 0.8rem;">
+                    This simulation models chips like <strong>Intel Loihi</strong> and <strong>IBM TrueNorth</strong>. Your parameters map directly to their neuron circuits.
+                </p>
+            </div>
+        </aside>
+    </div>
 
     <script>
         // ==================== STATE ====================
         const state = {
-            // Stage states
-            currentStage: 0,
-            isRunning: false,
+            inputType: 'draw',
+            selectedPattern: null,
+            isProcessing: false,
             
-            // Input encoding
-            inputSignal: 50,
-            encodingMethod: 'rate',
-            noiseLevel: 10,
-            spikeTrain: [],
-            
-            // Neurons
-            neurons: [],
+            // Parameters
             neuronModel: 'lif',
             threshold: 1.0,
-            leakRate: 0.95,
+            leak: 0.95,
+            timeSteps: 50,
+            hiddenNeurons: 16,
+            encoding: 'rate',
+            noise: 5,
             
-            // Synapses
-            synapses: [],
+            // Network
+            inputSize: 64,
+            outputSize: 8,
+            layers: [],
+            connections: [],
             
-            // STDP
-            stdpRate: 0.05,
-            stdpWindow: 20,
-            preFireTime: null,
-            postFireTime: null,
-            synapseWeight: 1.0,
-            
-            // Output
-            outputClasses: [
-                { id: 0, label: 'Class A', icon: '🔴', spikes: 0 },
-                { id: 1, label: 'Class B', icon: '🟢', spikes: 0 },
-                { id: 2, label: 'Class C', icon: '🔵', spikes: 0 },
-                { id: 3, label: 'Class D', icon: '🟡', spikes: 0 }
-            ],
-            
-            // Stats
-            totalSpikes: 0,
+            // Results
+            spikeCount: 0,
             activeNeurons: 0,
-            energySaved: 0,
-            latency: 0
+            outputSpikes: [],
+            timelineSpikes: []
         };
 
-        // ==================== INITIALIZATION ====================
-        function initWorkflow() {
-            initEncodingGrid();
-            initNeurons();
-            initSynapses();
-            initOutputDisplay();
-            updateAllDisplays();
+        // Output classes based on input type
+        const outputClasses = {
+            draw: [
+                { id: 0, icon: '📝', name: 'Line' },
+                { id: 1, icon: '⭕', name: 'Circle' },
+                { id: 2, icon: '⬜', name: 'Square' },
+                { id: 3, icon: '🔺', name: 'Triangle' },
+                { id: 4, icon: '✏️', name: 'Scribble' },
+                { id: 5, icon: '➡️', name: 'Arrow' },
+                { id: 6, icon: '❌', name: 'Cross' },
+                { id: 7, icon: '❓', name: 'Other' }
+            ],
+            pattern: [
+                { id: 0, icon: '⭕', name: 'Circle' },
+                { id: 1, icon: '⬜', name: 'Square' },
+                { id: 2, icon: '🔺', name: 'Triangle' },
+                { id: 3, icon: '⭐', name: 'Star' },
+                { id: 4, icon: '❤️', name: 'Heart' },
+                { id: 5, icon: '✚', name: 'Cross' },
+                { id: 6, icon: '💎', name: 'Diamond' },
+                { id: 7, icon: '🌙', name: 'Moon' }
+            ],
+            number: [
+                { id: 0, icon: '0️⃣', name: 'Zero' },
+                { id: 1, icon: '1️⃣', name: 'One' },
+                { id: 2, icon: '2️⃣', name: 'Two' },
+                { id: 3, icon: '3️⃣', name: 'Three' },
+                { id: 4, icon: '4️⃣', name: 'Four' },
+                { id: 5, icon: '5️⃣', name: 'Five' },
+                { id: 6, icon: '6️⃣', name: 'Six' },
+                { id: 7, icon: '7️⃣', name: 'Seven' },
+                { id: 8, icon: '8️⃣', name: 'Eight' },
+                { id: 9, icon: '9️⃣', name: 'Nine' }
+            ]
+        };
+
+        // ==================== CANVAS SETUP ====================
+        const drawCanvas = document.getElementById('drawCanvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        const chipCanvas = document.getElementById('chipCanvas');
+        const chipCtx = chipCanvas.getContext('2d');
+
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Drawing handlers
+        drawCanvas.addEventListener('mousedown', startDrawing);
+        drawCanvas.addEventListener('mousemove', draw);
+        drawCanvas.addEventListener('mouseup', stopDrawing);
+        drawCanvas.addEventListener('mouseout', stopDrawing);
+        drawCanvas.addEventListener('touchstart', handleTouch);
+        drawCanvas.addEventListener('touchmove', handleTouchMove);
+        drawCanvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
         }
 
-        function initEncodingGrid() {
-            const grid = document.getElementById('encodingGrid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 20; i++) {
-                const pixel = document.createElement('div');
-                pixel.className = 'pixel';
-                pixel.id = `pixel-${i}`;
-                grid.appendChild(pixel);
-            }
-        }
-
-        function initNeurons() {
-            state.neurons = [];
-            const grid = document.getElementById('neuronGrid');
-            grid.innerHTML = '';
+        function draw(e) {
+            if (!isDrawing) return;
             
-            for (let i = 0; i < 8; i++) {
-                const neuron = {
-                    id: i,
-                    voltage: 0,
-                    lastSpikeTime: -1000,
-                    spikeCount: 0
-                };
-                state.neurons.push(neuron);
-                
-                const cell = document.createElement('div');
-                cell.className = 'neuron-cell';
-                cell.id = `neuron-${i}`;
-                cell.innerHTML = `
-                    <div class="neuron-id">N${i}</div>
-                    <div class="neuron-voltage" id="voltage-${i}">0%</div>
-                    <div class="neuron-meter">
-                        <div class="neuron-meter-fill" id="meter-${i}" style="width: 0%"></div>
-                    </div>
-                `;
-                grid.appendChild(cell);
-            }
-        }
-
-        function initSynapses() {
-            state.synapses = [];
-            // Create random connections between neurons
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    if (i !== j && Math.random() > 0.6) {
-                        state.synapses.push({
-                            from: i,
-                            to: j,
-                            weight: Math.random() * 0.5 + 0.5,
-                            lastActivity: -1000
-                        });
-                    }
-                }
-            }
-            drawConnections();
-        }
-
-        function initOutputDisplay() {
-            const grid = document.getElementById('outputGrid');
-            grid.innerHTML = '';
+            drawCtx.strokeStyle = '#58a6ff';
+            drawCtx.lineWidth = 8;
+            drawCtx.lineCap = 'round';
+            drawCtx.lineJoin = 'round';
             
-            state.outputClasses.forEach(cls => {
-                const div = document.createElement('div');
-                div.className = 'output-class';
-                div.id = `output-${cls.id}`;
-                div.innerHTML = `
-                    <div class="class-icon">${cls.icon}</div>
-                    <div class="class-label">${cls.label}</div>
-                    <div class="class-confidence" id="conf-${cls.id}">0%</div>
-                    <div class="class-bar">
-                        <div class="class-bar-fill" id="bar-${cls.id}" style="width: 0%"></div>
-                    </div>
-                `;
-                grid.appendChild(div);
+            drawCtx.beginPath();
+            drawCtx.moveTo(lastX, lastY);
+            drawCtx.lineTo(e.offsetX, e.offsetY);
+            drawCtx.stroke();
+            
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = drawCanvas.getBoundingClientRect();
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+            isDrawing = true;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            
+            const touch = e.touches[0];
+            const rect = drawCanvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            drawCtx.strokeStyle = '#58a6ff';
+            drawCtx.lineWidth = 8;
+            drawCtx.lineCap = 'round';
+            
+            drawCtx.beginPath();
+            drawCtx.moveTo(lastX, lastY);
+            drawCtx.lineTo(x, y);
+            drawCtx.stroke();
+            
+            [lastX, lastY] = [x, y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearCanvas() {
+            drawCtx.fillStyle = '#0d1117';
+            drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+        }
+
+        function randomDraw() {
+            clearCanvas();
+            drawCtx.strokeStyle = '#58a6ff';
+            drawCtx.lineWidth = 8;
+            drawCtx.lineCap = 'round';
+            
+            // Random shape
+            const shape = Math.floor(Math.random() * 4);
+            const cx = 100, cy = 100;
+            
+            drawCtx.beginPath();
+            switch(shape) {
+                case 0: // Circle
+                    drawCtx.arc(cx, cy, 60, 0, Math.PI * 2);
+                    break;
+                case 1: // Square
+                    drawCtx.rect(40, 40, 120, 120);
+                    break;
+                case 2: // Triangle
+                    drawCtx.moveTo(100, 30);
+                    drawCtx.lineTo(170, 170);
+                    drawCtx.lineTo(30, 170);
+                    drawCtx.closePath();
+                    break;
+                case 3: // Line
+                    drawCtx.moveTo(30, 170);
+                    drawCtx.lineTo(170, 30);
+                    break;
+            }
+            drawCtx.stroke();
+        }
+
+        // ==================== INPUT TYPE SWITCHING ====================
+        function switchInputType(type) {
+            state.inputType = type;
+            
+            document.querySelectorAll('.input-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+            
+            document.getElementById('drawInput').style.display = type === 'draw' ? 'block' : 'none';
+            document.getElementById('patternInput').style.display = type === 'pattern' ? 'block' : 'none';
+            document.getElementById('numberInput').style.display = type === 'number' ? 'block' : 'none';
+            
+            resetOutput();
+        }
+
+        function selectPattern(pattern) {
+            state.selectedPattern = pattern;
+            document.querySelectorAll('.pattern-item').forEach(item => {
+                item.classList.toggle('selected', item.dataset.pattern === pattern);
             });
         }
 
-        // ==================== WORKFLOW EXECUTION ====================
-        async function runWorkflow() {
-            if (state.isRunning) return;
+        // ==================== PARAMETER UPDATES ====================
+        const modelDescriptions = {
+            lif: '<strong>LIF:</strong> Neurons accumulate input and leak over time. Most common model - balances biology and efficiency.',
+            if: '<strong>IF:</strong> Perfect integration without decay. Simpler but less realistic. Good for basic demos.',
+            alif: '<strong>ALIF:</strong> Adaptive threshold - neurons that fire repeatedly become harder to trigger. Models fatigue.'
+        };
+
+        const encodingDescriptions = {
+            rate: '<strong>Rate:</strong> Input intensity = spike frequency. Simple and robust for most tasks.',
+            temporal: '<strong>Temporal:</strong> Exact spike timing encodes information. More efficient but complex.'
+        };
+
+        document.getElementById('neuronModel').addEventListener('change', (e) => {
+            state.neuronModel = e.target.value;
+            document.getElementById('modelDesc').innerHTML = modelDescriptions[e.target.value];
+        });
+
+        document.getElementById('encoding').addEventListener('change', (e) => {
+            state.encoding = e.target.value;
+            document.getElementById('encodingDesc').innerHTML = encodingDescriptions[e.target.value];
+        });
+
+        document.getElementById('threshold').addEventListener('input', (e) => {
+            state.threshold = parseFloat(e.target.value);
+            document.getElementById('thresholdVal').textContent = state.threshold.toFixed(1);
+        });
+
+        document.getElementById('leak').addEventListener('input', (e) => {
+            state.leak = parseFloat(e.target.value);
+            document.getElementById('leakVal').textContent = state.leak.toFixed(2);
+        });
+
+        document.getElementById('timeSteps').addEventListener('input', (e) => {
+            state.timeSteps = parseInt(e.target.value);
+            document.getElementById('stepsVal').textContent = state.timeSteps;
+        });
+
+        document.getElementById('hiddenNeurons').addEventListener('input', (e) => {
+            state.hiddenNeurons = parseInt(e.target.value);
+            document.getElementById('neuronsVal').textContent = state.hiddenNeurons;
+        });
+
+        document.getElementById('noise').addEventListener('input', (e) => {
+            state.noise = parseInt(e.target.value);
+            document.getElementById('noiseVal').textContent = state.noise + '%';
+        });
+
+        // ==================== NETWORK INITIALIZATION ====================
+        function initNetwork() {
+            state.layers = [];
+            state.connections = [];
             
-            state.isRunning = true;
-            document.getElementById('runBtn').disabled = true;
+            const sizes = [state.inputSize, state.hiddenNeurons, state.hiddenNeurons, state.outputSize];
             
-            // Reset stats
-            state.totalSpikes = 0;
+            // Create layers
+            sizes.forEach((size, layerIdx) => {
+                const layer = [];
+                for (let i = 0; i < size; i++) {
+                    layer.push({
+                        voltage: 0,
+                        threshold: state.threshold,
+                        adaptiveThreshold: 0,
+                        lastSpike: -1000,
+                        spikeCount: 0
+                    });
+                }
+                state.layers.push(layer);
+            });
+            
+            // Create connections with random weights
+            for (let l = 0; l < sizes.length - 1; l++) {
+                const layerConns = [];
+                for (let i = 0; i < sizes[l]; i++) {
+                    for (let j = 0; j < sizes[l + 1]; j++) {
+                        if (Math.random() > 0.3) { // Sparse connectivity
+                            layerConns.push({
+                                from: i,
+                                to: j,
+                                weight: Math.random() * 0.5 + 0.3
+                            });
+                        }
+                    }
+                }
+                state.connections.push(layerConns);
+            }
+        }
+
+        // ==================== GET INPUT DATA ====================
+        function getInputData() {
+            let input = new Array(state.inputSize).fill(0);
+            
+            switch(state.inputType) {
+                case 'draw':
+                    // Sample canvas
+                    const imageData = drawCtx.getImageData(0, 0, 200, 200);
+                    const gridSize = Math.sqrt(state.inputSize);
+                    const cellSize = 200 / gridSize;
+                    
+                    for (let i = 0; i < gridSize; i++) {
+                        for (let j = 0; j < gridSize; j++) {
+                            let sum = 0;
+                            let count = 0;
+                            
+                            for (let dy = 0; dy < cellSize; dy++) {
+                                for (let dx = 0; dx < cellSize; dx++) {
+                                    const px = Math.floor(j * cellSize + dx);
+                                    const py = Math.floor(i * cellSize + dy);
+                                    const idx = (py * 200 + px) * 4;
+                                    sum += imageData.data[idx] + imageData.data[idx + 1] + imageData.data[idx + 2];
+                                    count++;
+                                }
+                            }
+                            
+                            input[i * gridSize + j] = (sum / count) / 765; // Normalize to 0-1
+                        }
+                    }
+                    break;
+                    
+                case 'pattern':
+                    // Create pattern-specific input
+                    const patterns = {
+                        circle: () => {
+                            const s = Math.sqrt(state.inputSize);
+                            for (let i = 0; i < s; i++) {
+                                for (let j = 0; j < s; j++) {
+                                    const dx = (j - s/2) / (s/2);
+                                    const dy = (i - s/2) / (s/2);
+                                    const dist = Math.sqrt(dx*dx + dy*dy);
+                                    input[i * s + j] = Math.abs(dist - 0.7) < 0.2 ? 1 : 0;
+                                }
+                            }
+                        },
+                        square: () => {
+                            const s = Math.sqrt(state.inputSize);
+                            for (let i = 0; i < s; i++) {
+                                for (let j = 0; j < s; j++) {
+                                    const edge = i < 2 || i >= s-2 || j < 2 || j >= s-2;
+                                    input[i * s + j] = edge ? 1 : 0;
+                                }
+                            }
+                        },
+                        triangle: () => {
+                            const s = Math.sqrt(state.inputSize);
+                            for (let i = 0; i < s; i++) {
+                                for (let j = 0; j < s; j++) {
+                                    const inTriangle = j >= i/2 && j <= s - i/2;
+                                    input[i * s + j] = (i === s-1 || Math.abs(j - i/2) < 1 || Math.abs(j - (s - i/2)) < 1) && inTriangle ? 1 : 0;
+                                }
+                            }
+                        }
+                    };
+                    
+                    if (patterns[state.selectedPattern]) {
+                        patterns[state.selectedPattern]();
+                    } else {
+                        // Random activation for other patterns
+                        input = input.map(() => Math.random() > 0.5 ? 1 : 0);
+                    }
+                    break;
+                    
+                case 'number':
+                    // Create number-specific encoding
+                    const num = parseInt(document.getElementById('numInput').value) || 0;
+                    // Simple encoding: activate neurons based on digit value
+                    for (let i = 0; i < state.inputSize; i++) {
+                        input[i] = (i % 10 === num) ? 1 : (Math.random() > 0.7 ? 0.3 : 0);
+                    }
+                    break;
+            }
+            
+            // Add noise
+            input = input.map(v => {
+                const noise = (Math.random() - 0.5) * (state.noise / 100) * 2;
+                return Math.max(0, Math.min(1, v + noise));
+            });
+            
+            return input;
+        }
+
+        // ==================== MAIN PROCESSING ====================
+        async function runProcessing() {
+            if (state.isProcessing) return;
+            
+            state.isProcessing = true;
+            document.getElementById('processBtn').disabled = true;
+            
+            // Reset
+            state.spikeCount = 0;
             state.activeNeurons = 0;
-            state.energySaved = 0;
-            state.latency = 0;
+            state.timelineSpikes = [];
+            clearTimeline();
+            resetStatus();
+            
+            // Initialize network
+            initNetwork();
+            
+            // Get input
+            const input = getInputData();
             
             // Stage 1: Encoding
-            await runStage1();
+            await runEncodingStage(input);
             
-            // Stage 2: Neuron Update
-            await runStage2();
+            // Stage 2: Processing
+            await runProcessingStage(input);
             
-            // Stage 3: Routing
-            await runStage3();
+            // Stage 3: Decoding
+            await runDecodingStage();
             
-            // Stage 4: Learning
-            await runStage4();
-            
-            // Stage 5: Output
-            await runStage5();
-            
-            state.isRunning = false;
-            document.getElementById('runBtn').disabled = false;
-            
-            showToast('✅', 'Workflow complete!');
-            calculateEnergyEfficiency();
+            state.isProcessing = false;
+            document.getElementById('processBtn').disabled = false;
         }
 
-        async function runStage1() {
-            setStageStatus(1, 'processing');
-            showToast('⚡', 'Stage 1: Encoding input to spikes');
+        async function runEncodingStage(input) {
+            setStatus(1, 'active');
+            updateExplanation('encode', 'Converting your input into spike trains. Each input value determines spike probability over time.');
             
-            // Generate spike train based on input
-            const spikeCount = Math.floor((state.inputSignal / 100) * 30);
-            state.spikeTrain = [];
+            document.getElementById('inputCard').classList.add('active');
+            document.getElementById('arrow1').classList.add('active');
             
-            // Animate encoding grid
-            for (let i = 0; i < 20; i++) {
-                const pixel = document.getElementById(`pixel-${i}`);
-                const intensity = state.inputSignal / 100 + (Math.random() - 0.5) * (state.noiseLevel / 100);
-                pixel.style.background = `rgba(99, 102, 241, ${Math.max(0, Math.min(1, intensity))})`;
-            }
-            
-            // Generate spikes
-            const display = document.getElementById('spikeTrainDisplay');
-            display.innerHTML = '';
-            
-            for (let i = 0; i < 40; i++) {
-                await sleep(30);
-                const hasSpike = state.encodingMethod === 'rate' 
-                    ? Math.random() < (state.inputSignal / 100)
-                    : (i % Math.floor(100 / Math.max(1, state.inputSignal))) === 0;
-                
-                const bar = document.createElement('div');
-                bar.className = 'spike-bar';
-                bar.style.height = hasSpike ? '100%' : '0%';
-                display.appendChild(bar);
-                
-                if (hasSpike) {
-                    state.spikeTrain.push(i);
-                    state.totalSpikes++;
+            // Generate input spikes
+            for (let t = 0; t < state.timeSteps / 2; t++) {
+                for (let i = 0; i < input.length; i++) {
+                    const spikeProb = state.encoding === 'rate' 
+                        ? input[i] 
+                        : (t === Math.floor(input[i] * state.timeSteps / 2) ? 1 : 0);
+                    
+                    if (Math.random() < spikeProb * 0.5) {
+                        state.spikeCount++;
+                        addTimelineSpike(0, t / (state.timeSteps / 2));
+                    }
                 }
-            }
-            
-            state.latency += 15;
-            setStageStatus(1, 'complete');
-            await sleep(500);
-        }
-
-        async function runStage2() {
-            setStageStatus(2, 'processing');
-            showToast('🧠', 'Stage 2: Updating neuron states');
-            
-            const dt = 0.01;
-            const steps = 50;
-            
-            for (let step = 0; step < steps; step++) {
-                state.neurons.forEach((neuron, idx) => {
-                    // Get input from spike train
-                    const input = state.spikeTrain.includes(step) ? 0.3 : 0;
-                    
-                    // Update voltage based on model
-                    switch(state.neuronModel) {
-                        case 'if':
-                            neuron.voltage += input * dt * 50;
-                            break;
-                        case 'lif':
-                            neuron.voltage = neuron.voltage * state.leakRate + input * dt * 50;
-                            break;
-                        case 'alif':
-                            neuron.voltage = neuron.voltage * state.leakRate + input * dt * 50;
-                            break;
-                    }
-                    
-                    // Check for spike
-                    if (neuron.voltage >= state.threshold) {
-                        neuron.voltage = 0;
-                        neuron.lastSpikeTime = step;
-                        neuron.spikeCount++;
-                        state.totalSpikes++;
-                        
-                        // Visual feedback
-                        const cell = document.getElementById(`neuron-${idx}`);
-                        cell.classList.add('firing');
-                        setTimeout(() => cell.classList.remove('firing'), 300);
-                    }
-                    
-                    // Update display
-                    const voltagePercent = Math.round((neuron.voltage / state.threshold) * 100);
-                    document.getElementById(`voltage-${idx}`).textContent = `${voltagePercent}%`;
-                    document.getElementById(`meter-${idx}`).style.width = `${Math.min(100, voltagePercent)}%`;
-                });
                 
+                updateStats();
                 await sleep(20);
             }
             
-            state.activeNeurons = state.neurons.filter(n => n.spikeCount > 0).length;
-            state.latency += 25;
-            setStageStatus(2, 'complete');
-            await sleep(500);
+            setStatus(1, 'complete');
+            document.getElementById('inputCard').classList.remove('active');
+            await sleep(200);
         }
 
-        async function runStage3() {
-            setStageStatus(3, 'processing');
-            showToast('🔗', 'Stage 3: Routing spike events');
+        async function runProcessingStage(input) {
+            setStatus(2, 'active');
+            updateExplanation('process', `Spikes propagate through ${state.hiddenNeurons} neurons per layer. Using ${state.neuronModel.toUpperCase()} model with threshold ${state.threshold}.`);
             
-            let inputSpikes = 0;
-            let outputSpikes = 0;
+            document.getElementById('chipCard').classList.add('active');
+            document.getElementById('arrow2').classList.add('active');
             
-            // Animate spike routing
-            for (let i = 0; i < 30; i++) {
-                // Random spike activity
-                if (Math.random() > 0.6) {
-                    inputSpikes++;
-                    document.getElementById('routerInput').classList.add('active');
-                    setTimeout(() => document.getElementById('routerInput').classList.remove('active'), 200);
+            // Run simulation
+            for (let t = 0; t < state.timeSteps; t++) {
+                // Layer by layer processing
+                for (let l = 0; l < state.layers.length; l++) {
+                    const layer = state.layers[l];
                     
-                    await sleep(100);
-                    
-                    document.getElementById('routerProcessing').classList.add('active');
-                    setTimeout(() => document.getElementById('routerProcessing').classList.remove('active'), 200);
-                    
-                    await sleep(100);
-                    
-                    outputSpikes++;
-                    document.getElementById('routerOutput').classList.add('active');
-                    setTimeout(() => document.getElementById('routerOutput').classList.remove('active'), 200);
-                }
-                
-                document.getElementById('routerInputCount').textContent = inputSpikes;
-                document.getElementById('routerProcessingCount').textContent = Math.floor(inputSpikes * 0.7);
-                document.getElementById('routerOutputCount').textContent = outputSpikes;
-                
-                // Animate connections
-                drawActiveConnections(i);
-                
-                await sleep(50);
-            }
-            
-            state.latency += 10;
-            setStageStatus(3, 'complete');
-            await sleep(500);
-        }
-
-        async function runStage4() {
-            setStageStatus(4, 'processing');
-            showToast('📚', 'Stage 4: STDP learning active');
-            
-            // Simulate STDP weight changes
-            for (let i = 0; i < 10; i++) {
-                state.synapses.forEach(syn => {
-                    const fromNeuron = state.neurons[syn.from];
-                    const toNeuron = state.neurons[syn.to];
-                    
-                    if (fromNeuron.lastSpikeTime >= 0 && toNeuron.lastSpikeTime >= 0) {
-                        const dt = toNeuron.lastSpikeTime - fromNeuron.lastSpikeTime;
+                    layer.forEach((neuron, nIdx) => {
+                        // Get input
+                        let totalInput = 0;
                         
-                        if (Math.abs(dt) < state.stdpWindow) {
-                            if (dt > 0) {
-                                // Strengthen
-                                syn.weight = Math.min(2, syn.weight + state.stdpRate);
-                            } else {
-                                // Weaken
-                                syn.weight = Math.max(0.1, syn.weight - state.stdpRate * 0.5);
+                        if (l === 0) {
+                            // Input layer
+                            if (nIdx < input.length) {
+                                totalInput = input[nIdx] * 0.3;
+                            }
+                        } else {
+                            // Hidden/output layers - get from connections
+                            const conns = state.connections[l - 1] || [];
+                            conns.forEach(conn => {
+                                if (conn.to === nIdx) {
+                                    const preNeuron = state.layers[l - 1][conn.from];
+                                    if (t - preNeuron.lastSpike < 3) {
+                                        totalInput += conn.weight * 0.2;
+                                    }
+                                }
+                            });
+                        }
+                        
+                        // Update neuron
+                        switch(state.neuronModel) {
+                            case 'if':
+                                neuron.voltage += totalInput;
+                                break;
+                            case 'lif':
+                                neuron.voltage = neuron.voltage * state.leak + totalInput;
+                                break;
+                            case 'alif':
+                                neuron.voltage = neuron.voltage * state.leak + totalInput;
+                                neuron.adaptiveThreshold *= 0.99;
+                                break;
+                        }
+                        
+                        // Check spike
+                        const effectiveThreshold = neuron.threshold + neuron.adaptiveThreshold;
+                        if (neuron.voltage >= effectiveThreshold) {
+                            neuron.voltage = 0;
+                            neuron.lastSpike = t;
+                            neuron.spikeCount++;
+                            state.spikeCount++;
+                            
+                            if (state.neuronModel === 'alif') {
+                                neuron.adaptiveThreshold += 0.2;
+                            }
+                            
+                            // Add to timeline
+                            if (l > 0) {
+                                addTimelineSpike(Math.min(l, 3), t / state.timeSteps);
                             }
                         }
-                    }
-                });
+                    });
+                }
                 
-                await sleep(100);
+                // Update visualization
+                drawChip(t);
+                updateStats();
+                
+                await sleep(30 / (state.timeSteps / 50));
             }
             
-            // Update average weight display
-            const avgWeight = state.synapses.reduce((sum, s) => sum + s.weight, 0) / state.synapses.length;
-            document.getElementById('avgWeight').textContent = avgWeight.toFixed(2);
-            
-            state.latency += 5;
-            setStageStatus(4, 'complete');
-            await sleep(500);
+            setStatus(2, 'complete');
+            document.getElementById('chipCard').classList.remove('active');
+            document.getElementById('arrow1').classList.remove('active');
+            await sleep(200);
         }
 
-        async function runStage5() {
-            setStageStatus(5, 'processing');
-            showToast('🎯', 'Stage 5: Decoding output');
+        async function runDecodingStage() {
+            setStatus(3, 'active');
+            updateExplanation('decode', 'Counting spikes from output neurons. The class with most spikes wins.');
             
-            // Simulate output spike accumulation
-            for (let i = 0; i < 50; i++) {
-                state.outputClasses.forEach(cls => {
-                    // Random spike based on input signal
-                    if (Math.random() < (state.inputSignal / 100) * (0.8 - cls.id * 0.15)) {
-                        cls.spikes++;
-                    }
-                });
-                
-                await sleep(30);
-                updateOutputDisplay();
-            }
+            document.getElementById('outputCard').classList.add('active');
+            document.getElementById('arrow2').classList.remove('active');
             
-            // Determine winner
-            const winner = state.outputClasses.reduce((max, cls) => 
-                cls.spikes > max.spikes ? cls : max
-            );
+            // Count output spikes
+            const outputLayer = state.layers[state.layers.length - 1];
+            const spikeCounts = outputLayer.map(n => n.spikeCount);
+            const totalSpikes = spikeCounts.reduce((a, b) => a + b, 0);
             
-            document.getElementById(`output-${winner.id}`).classList.add('winner');
-            document.getElementById('prediction').textContent = winner.label;
+            // Get classes for current input type
+            const classes = outputClasses[state.inputType];
             
-            state.latency += 8;
-            setStageStatus(5, 'complete');
-            showToast('🎉', `Prediction: ${winner.label}`);
-        }
-
-        // ==================== HELPER FUNCTIONS ====================
-        function setStageStatus(stage, status) {
-            const statusEl = document.getElementById(`status${stage}`);
-            const stageEl = document.getElementById(`stage${stage}`);
-            
-            statusEl.className = 'stage-status';
-            stageEl.classList.remove('active');
-            
-            switch(status) {
-                case 'idle':
-                    statusEl.classList.add('status-idle');
-                    statusEl.textContent = 'Idle';
-                    break;
-                case 'processing':
-                    statusEl.classList.add('status-processing');
-                    statusEl.textContent = 'Processing...';
-                    stageEl.classList.add('active');
-                    break;
-                case 'complete':
-                    statusEl.classList.add('status-complete');
-                    statusEl.textContent = 'Complete ✓';
-                    break;
-            }
-        }
-
-        function drawConnections() {
-            const canvas = document.getElementById('connectionCanvas');
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // Draw layer 1 neurons (left)
-            const layer1X = 100;
-            const layer2X = width - 100;
-            
-            for (let i = 0; i < 4; i++) {
-                const y = (i + 1) * height / 5;
-                
-                // Layer 1 neuron
-                ctx.fillStyle = '#6366f1';
-                ctx.beginPath();
-                ctx.arc(layer1X, y, 15, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Layer 2 neuron
-                ctx.fillStyle = '#8b5cf6';
-                ctx.beginPath();
-                ctx.arc(layer2X, y, 15, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            // Draw connections
-            state.synapses.slice(0, 16).forEach(syn => {
-                const fromY = ((syn.from % 4) + 1) * height / 5;
-                const toY = ((syn.to % 4) + 1) * height / 5;
-                
-                ctx.strokeStyle = `rgba(99, 102, 241, ${syn.weight * 0.3})`;
-                ctx.lineWidth = syn.weight * 2;
-                ctx.beginPath();
-                ctx.moveTo(layer1X + 15, fromY);
-                ctx.lineTo(layer2X - 15, toY);
-                ctx.stroke();
-            });
-        }
-
-        function drawActiveConnections(frame) {
-            drawConnections();
-            
-            const canvas = document.getElementById('connectionCanvas');
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            const layer1X = 100;
-            const layer2X = width - 100;
-            
-            // Highlight active connections
-            state.synapses.slice(0, 16).forEach((syn, idx) => {
-                if ((frame + idx) % 10 === 0) {
-                    const fromY = ((syn.from % 4) + 1) * height / 5;
-                    const toY = ((syn.to % 4) + 1) * height / 5;
-                    
-                    ctx.strokeStyle = '#f59e0b';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.moveTo(layer1X + 15, fromY);
-                    ctx.lineTo(layer2X - 15, toY);
-                    ctx.stroke();
-                    
-                    // Spike animation
-                    const t = (frame % 10) / 10;
-                    const x = layer1X + 15 + t * (layer2X - layer1X - 30);
-                    const y = fromY + t * (toY - fromY);
-                    
-                    ctx.fillStyle = '#f59e0b';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, Math.PI * 2);
-                    ctx.fill();
+            // Find winner
+            let maxSpikes = 0;
+            let winnerId = 0;
+            spikeCounts.forEach((count, idx) => {
+                if (idx < classes.length && count > maxSpikes) {
+                    maxSpikes = count;
+                    winnerId = idx;
                 }
             });
-        }
-
-        function updateOutputDisplay() {
-            const total = state.outputClasses.reduce((sum, cls) => sum + cls.spikes, 0);
             
-            state.outputClasses.forEach(cls => {
-                const percent = total > 0 ? Math.round((cls.spikes / total) * 100) : 0;
-                document.getElementById(`conf-${cls.id}`).textContent = `${percent}%`;
-                document.getElementById(`bar-${cls.id}`).style.width = `${percent}%`;
+            // Display results
+            document.getElementById('outputWaiting').style.display = 'none';
+            document.getElementById('outputResult').style.display = 'block';
+            
+            const winner = classes[winnerId] || classes[0];
+            const confidence = totalSpikes > 0 ? Math.round((maxSpikes / totalSpikes) * 100) : 50;
+            
+            document.getElementById('outputMain').textContent = winner.icon;
+            document.getElementById('outputConf').textContent = confidence + '%';
+            document.getElementById('outputBarFill').style.width = confidence + '%';
+            
+            // Display all classes
+            const classesContainer = document.getElementById('outputClasses');
+            classesContainer.innerHTML = '';
+            
+            classes.slice(0, 8).forEach((cls, idx) => {
+                const count = spikeCounts[idx] || 0;
+                const pct = totalSpikes > 0 ? Math.round((count / totalSpikes) * 100) : 0;
+                
+                const div = document.createElement('div');
+                div.className = 'output-class' + (idx === winnerId ? ' winner' : '');
+                div.innerHTML = `
+                    <span class="output-class-icon">${cls.icon}</span>
+                    <span class="output-class-name">${cls.name}</span>
+                    <span class="output-class-score">${pct}%</span>
+                    <div class="output-class-bar">
+                        <div class="output-class-bar-fill" style="width: ${pct}%"></div>
+                    </div>
+                `;
+                classesContainer.appendChild(div);
             });
-        }
-
-        function calculateEnergyEfficiency() {
-            // Calculate sparsity (energy saved)
-            const maxPossibleSpikes = state.neurons.length * 50 * 3; // 3 stages
-            const actualSpikes = state.totalSpikes;
-            const sparsity = 1 - (actualSpikes / maxPossibleSpikes);
-            state.energySaved = Math.round(sparsity * 100);
             
-            // Update energy bars
-            const neuroEnergy = Math.max(5, Math.round((1 - sparsity) * 100));
-            document.getElementById('neuroEnergy').textContent = `${neuroEnergy} mW`;
-            document.getElementById('neuroEnergyBar').style.width = `${neuroEnergy}%`;
+            setStatus(3, 'complete');
+            document.getElementById('outputCard').classList.remove('active');
             
-            updateAllDisplays();
+            updateExplanation('complete', `Classification complete! The chip identified "${winner.name}" with ${confidence}% confidence using only ${state.spikeCount} spike events.`);
         }
 
-        function updateAllDisplays() {
-            document.getElementById('totalSpikes').textContent = state.totalSpikes;
-            document.getElementById('activeNeurons').textContent = state.activeNeurons;
-            document.getElementById('energySaved').textContent = state.energySaved + '%';
-            document.getElementById('latency').textContent = state.latency;
-        }
-
-        function resetWorkflow() {
-            // Reset all stages
-            for (let i = 1; i <= 5; i++) {
-                setStageStatus(i, 'idle');
+        // ==================== VISUALIZATION ====================
+        function drawChip(time) {
+            const ctx = chipCtx;
+            const w = chipCanvas.width;
+            const h = chipCanvas.height;
+            
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, w, h);
+            
+            const layerPositions = [0.15, 0.4, 0.6, 0.85];
+            const layerColors = ['#58a6ff', '#a371f7', '#a371f7', '#3fb950'];
+            
+            // Draw connections (simplified)
+            ctx.strokeStyle = 'rgba(88, 166, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            for (let l = 0; l < state.layers.length - 1; l++) {
+                const x1 = layerPositions[l] * w;
+                const x2 = layerPositions[l + 1] * w;
+                
+                for (let i = 0; i < Math.min(8, state.layers[l].length); i++) {
+                    const y1 = ((i + 1) / 9) * h;
+                    for (let j = 0; j < Math.min(8, state.layers[l + 1].length); j++) {
+                        const y2 = ((j + 1) / 9) * h;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.stroke();
+                    }
+                }
             }
             
-            // Reset output classes
-            state.outputClasses.forEach(cls => {
-                cls.spikes = 0;
-                document.getElementById(`output-${cls.id}`).classList.remove('winner');
+            // Draw neurons
+            state.layers.forEach((layer, layerIdx) => {
+                const x = layerPositions[layerIdx] * w;
+                const displayCount = Math.min(8, layer.length);
+                
+                for (let i = 0; i < displayCount; i++) {
+                    const neuron = layer[i];
+                    const y = ((i + 1) / (displayCount + 1)) * h;
+                    
+                    const isFiring = time - neuron.lastSpike < 2;
+                    const isActive = neuron.voltage > state.threshold * 0.3;
+                    
+                    ctx.beginPath();
+                    ctx.arc(x, y, isFiring ? 10 : 6, 0, Math.PI * 2);
+                    
+                    if (isFiring) {
+                        ctx.fillStyle = '#d29922';
+                        ctx.shadowColor = '#d29922';
+                        ctx.shadowBlur = 15;
+                    } else if (isActive) {
+                        ctx.fillStyle = layerColors[layerIdx];
+                        ctx.shadowBlur = 0;
+                    } else {
+                        ctx.fillStyle = '#21262d';
+                        ctx.shadowBlur = 0;
+                    }
+                    
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    // Border
+                    ctx.strokeStyle = layerColors[layerIdx];
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
             });
             
-            // Reset displays
-            state.totalSpikes = 0;
-            state.activeNeurons = 0;
-            state.energySaved = 0;
-            state.latency = 0;
-            document.getElementById('prediction').textContent = '-';
+            // Layer labels
+            ctx.fillStyle = '#6e7681';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
             
-            updateAllDisplays();
-            updateOutputDisplay();
-            
-            // Reset neurons
-            state.neurons.forEach((n, idx) => {
-                n.voltage = 0;
-                n.spikeCount = 0;
-                n.lastSpikeTime = -1000;
-                document.getElementById(`voltage-${idx}`).textContent = '0%';
-                document.getElementById(`meter-${idx}`).style.width = '0%';
+            const labels = ['Input', 'Hidden 1', 'Hidden 2', 'Output'];
+            layerPositions.forEach((pos, idx) => {
+                ctx.fillText(labels[idx], pos * w, h - 10);
             });
+        }
+
+        function updateStats() {
+            document.getElementById('spikeCount').textContent = state.spikeCount;
             
-            // Clear spike train
-            document.getElementById('spikeTrainDisplay').innerHTML = '';
+            let active = 0;
+            state.layers.forEach(layer => {
+                layer.forEach(n => {
+                    if (n.spikeCount > 0) active++;
+                });
+            });
+            state.activeNeurons = active;
+            document.getElementById('activeCount').textContent = active;
             
-            // Reset router
-            document.getElementById('routerInputCount').textContent = '0';
-            document.getElementById('routerProcessingCount').textContent = '0';
-            document.getElementById('routerOutputCount').textContent = '0';
+            // Energy estimate (sparse = low energy)
+            const totalNeurons = state.layers.reduce((sum, l) => sum + l.length, 0);
+            const sparsity = 1 - (active / totalNeurons);
+            const energy = Math.round((1 - sparsity * 0.9) * 10);
+            document.getElementById('energyVal').textContent = energy + ' mW';
             
-            // Reset synapse weight
-            state.synapseWeight = 1.0;
-            document.getElementById('synapseWeight').textContent = '1.00';
-            document.getElementById('synapseArrow').className = 'synapse-arrow';
+            // Latency
+            const latency = Math.round(state.timeSteps * 0.5);
+            document.getElementById('latencyVal').textContent = latency + ' ms';
+        }
+
+        function addTimelineSpike(layer, time) {
+            const trackLayer = document.getElementById(`layer${layer}`);
+            if (!trackLayer) return;
             
-            showToast('🔄', 'Workflow reset');
+            const spike = document.createElement('div');
+            spike.className = 'spike-marker';
+            spike.style.left = `${time * 100}%`;
+            spike.style.background = ['#58a6ff', '#a371f7', '#a371f7', '#3fb950'][layer];
+            trackLayer.appendChild(spike);
+        }
+
+        function clearTimeline() {
+            for (let i = 0; i < 4; i++) {
+                const layer = document.getElementById(`layer${i}`);
+                const spikes = layer.querySelectorAll('.spike-marker');
+                spikes.forEach(s => s.remove());
+            }
+        }
+
+        // ==================== UI HELPERS ====================
+        function setStatus(step, state) {
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById(`statusDot${i}`);
+                const text = document.getElementById(`statusText${i}`);
+                const line = document.getElementById(`statusLine${i}`);
+                
+                dot.classList.remove('active', 'complete');
+                text.classList.remove('active');
+                if (line) line.classList.remove('complete');
+                
+                if (i < step) {
+                    dot.classList.add('complete');
+                    if (line) line.classList.add('complete');
+                } else if (i === step) {
+                    if (state === 'active') {
+                        dot.classList.add('active');
+                        text.classList.add('active');
+                    } else if (state === 'complete') {
+                        dot.classList.add('complete');
+                        if (line) line.classList.add('complete');
+                    }
+                }
+            }
+        }
+
+        function resetStatus() {
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`statusDot${i}`).classList.remove('active', 'complete');
+                document.getElementById(`statusText${i}`).classList.remove('active');
+                const line = document.getElementById(`statusLine${i}`);
+                if (line) line.classList.remove('complete');
+            }
+        }
+
+        function updateExplanation(stage, text) {
+            const box = document.getElementById('stageExplanation');
+            const titles = {
+                encode: '📥 Encoding Input',
+                process: '⚡ Processing Spikes',
+                decode: '📤 Decoding Output',
+                complete: '✅ Complete'
+            };
+            
+            box.innerHTML = `
+                <div class="info-box-title">${titles[stage] || '🎯 Ready'}</div>
+                <p>${text}</p>
+            `;
+            
+            document.getElementById('currentStageDesc').textContent = text;
+        }
+
+        function resetOutput() {
+            document.getElementById('outputWaiting').style.display = 'flex';
+            document.getElementById('outputResult').style.display = 'none';
         }
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function showToast(icon, message) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <span style="font-size: 1.25rem;">${icon}</span>
-                <span>${message}</span>
-            `;
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // ==================== STDP INTERACTION ====================
-        function firePreNeuron() {
-            state.preFireTime = Date.now();
-            document.getElementById('preNeuron').classList.add('firing');
-            setTimeout(() => document.getElementById('preNeuron').classList.remove('firing'), 300);
-            updateSTDPWeight();
-        }
-
-        function firePostNeuron() {
-            state.postFireTime = Date.now();
-            document.getElementById('postNeuron').classList.add('firing');
-            setTimeout(() => document.getElementById('postNeuron').classList.remove('firing'), 300);
-            updateSTDPWeight();
-        }
-
-        function updateSTDPWeight() {
-            if (state.preFireTime && state.postFireTime) {
-                const dt = state.postFireTime - state.preFireTime;
-                
-                if (Math.abs(dt) < state.stdpWindow * 100) {
-                    const arrow = document.getElementById('synapseArrow');
-                    
-                    if (dt > 0) {
-                        // Pre before post - strengthen
-                        state.synapseWeight = Math.min(2, state.synapseWeight + parseFloat(state.stdpRate));
-                        arrow.className = 'synapse-arrow strengthened';
-                        showToast('💪', 'Connection strengthened!');
-                    } else {
-                        // Post before pre - weaken
-                        state.synapseWeight = Math.max(0.1, state.synapseWeight - parseFloat(state.stdpRate) * 0.5);
-                        arrow.className = 'synapse-arrow weakened';
-                        showToast('📉', 'Connection weakened');
-                    }
-                    
-                    document.getElementById('synapseWeight').textContent = state.synapseWeight.toFixed(2);
-                }
-            }
-        }
-
-        // ==================== EVENT LISTENERS ====================
-        document.getElementById('inputSignal').addEventListener('input', (e) => {
-            state.inputSignal = parseInt(e.target.value);
-            document.getElementById('inputValue').textContent = state.inputSignal;
-        });
-
-        document.getElementById('encodingMethod').addEventListener('change', (e) => {
-            state.encodingMethod = e.target.value;
-        });
-
-        document.getElementById('noiseLevel').addEventListener('input', (e) => {
-            state.noiseLevel = parseInt(e.target.value);
-            document.getElementById('noiseValue').textContent = state.noiseLevel;
-        });
-
-        document.getElementById('neuronModel').addEventListener('change', (e) => {
-            state.neuronModel = e.target.value;
-        });
-
-        document.getElementById('threshold').addEventListener('input', (e) => {
-            state.threshold = parseFloat(e.target.value);
-            document.getElementById('thresholdValue').textContent = state.threshold.toFixed(1);
-        });
-
-        document.getElementById('leakRate').addEventListener('input', (e) => {
-            state.leakRate = parseFloat(e.target.value);
-            document.getElementById('leakValue').textContent = state.leakRate.toFixed(2);
-        });
-
-        document.getElementById('stdpRate').addEventListener('change', (e) => {
-            state.stdpRate = parseFloat(e.target.value);
-        });
-
-        document.getElementById('stdpWindow').addEventListener('input', (e) => {
-            state.stdpWindow = parseInt(e.target.value);
-            document.getElementById('windowValue').textContent = state.stdpWindow;
-        });
-
-        // ==================== INIT ====================
-        window.addEventListener('load', initWorkflow);
-        window.addEventListener('resize', drawConnections);
+        // ==================== INITIALIZATION ====================
+        clearCanvas();
+        drawChip(0);
     </script>
 </body>
 </html>
