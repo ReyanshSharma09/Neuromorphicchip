@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuromorphic Computing Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1f2937;
+            --bg-card: #161f2e;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #06b6d4;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-color: #374151;
+            --glow-primary: rgba(99, 102, 241, 0.3);
+            --glow-secondary: rgba(139, 92, 246, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            animation: bgPulse 20s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-5%, -5%) scale(1.1); }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px var(--glow-primary);
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-tertiary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 15px var(--glow-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--glow-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-success) 0%, #059669 100%);
+            color: white;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1400px) {
+            .main-container {
+                grid-template-columns: 280px 1fr;
+            }
+            .info-panel {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            padding: 1rem 1.25rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title .icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .control-value {
+            float: right;
+            color: var(--accent-tertiary);
+            font-weight: 600;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 0.65rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--glow-primary);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--glow-primary);
+        }
+
+        /* Model Selector */
+        .model-selector {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .model-option {
+            padding: 0.85rem 1rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .model-option:hover {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .model-option.active {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 15px var(--glow-primary);
+        }
+
+        .model-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .model-option-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .model-option-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .model-option-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Visualization Area */
+        .viz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .overlay-badge {
+            padding: 0.4rem 0.8rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .overlay-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-voltage { background: var(--accent-tertiary); }
+        .dot-threshold { background: var(--accent-danger); }
+        .dot-spike { background: var(--accent-warning); }
+        .dot-input { background: var(--accent-success); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-card) 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-tertiary) 0%, var(--accent-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Network Visualization */
+        .network-viz {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Info Panel */
+        .info-panel .card-body {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-section h4 {
+            font-size: 0.95rem;
+            color: var(--accent-tertiary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-section p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .formula-box {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-warning);
+            margin: 0.75rem 0;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        .feature-list li {
+            padding: 0.4rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li::before {
+            content: '→';
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 0.75rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+
+        .comparison-table .highlight {
+            color: var(--accent-success);
+            font-weight: 600;
+        }
+
+        /* Encoding Demo */
+        .encoding-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .encoding-box {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .encoding-box h5 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-tertiary);
+        }
+
+        .spike-train {
+            display: flex;
+            gap: 3px;
+            height: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .spike-marker {
+            width: 3px;
+            background: var(--accent-warning);
+            border-radius: 2px;
+            animation: spikeGlow 0.5s ease;
+        }
+
+        @keyframes spikeGlow {
+            0% { box-shadow: 0 0 10px var(--accent-warning); }
+            100% { box-shadow: none; }
+        }
+
+        /* STDP Visualization */
+        .stdp-viz {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        .stdp-neuron {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .stdp-neuron.pre {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+        }
+
+        .stdp-neuron.post {
+            background: linear-gradient(135deg, var(--accent-tertiary) 0%, var(--accent-success) 100%);
+        }
+
+        .stdp-neuron.firing {
+            box-shadow: 0 0 30px currentColor;
+            transform: scale(1.1);
+        }
+
+        .stdp-connection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stdp-arrow {
+            width: 80px;
+            height: 4px;
+            background: var(--border-color);
+            position: relative;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .stdp-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--border-color);
+            font-size: 0.8rem;
+        }
+
+        .stdp-arrow.strengthened {
+            background: var(--accent-success);
+            height: 8px;
+        }
+
+        .stdp-arrow.strengthened::after {
+            color: var(--accent-success);
+        }
+
+        .stdp-arrow.weakened {
+            background: var(--accent-danger);
+            height: 2px;
+        }
+
+        .stdp-arrow.weakened::after {
+            color: var(--accent-danger);
+        }
+
+        .stdp-weight {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        .tab.active {
+            color: var(--accent-primary);
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--accent-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Energy Meter */
+        .energy-meter {
+            margin-top: 1rem;
+        }
+
+        .meter-bar {
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .meter-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.2) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .meter-fill.low {
+            background: linear-gradient(90deg, var(--accent-success) 0%, var(--accent-tertiary) 100%);
+        }
+
+        .meter-fill.medium {
+            background: linear-gradient(90deg, var(--accent-warning) 0%, var(--accent-danger) 100%);
+        }
+
+        .meter-fill.high {
+            background: linear-gradient(90deg, var(--accent-danger) 0%, #dc2626 100%);
+        }
+
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .main-container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .encoding-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <div class="logo-text">
+                    <h1>Neuromorphic Simulator</h1>
+                    <span>Spiking Neural Network Visualization</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-secondary" onclick="resetSimulation()">
+                    🔄 Reset
+                </button>
+                <button class="btn btn-primary" id="playBtn" onclick="toggleSimulation()">
+                    ▶️ Start
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    📊 Export
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Left Panel - Controls -->
+        <aside class="control-panel">
+            <!-- Neuron Model Selection -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">⚡</span>
+                        Neuron Model
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="model-selector" id="modelSelector">
+                        <div class="model-option active" data-model="lif">
+                            <div class="model-option-header">
+                                <span class="model-option-title">LIF</span>
+                                <span class="model-option-badge">Standard</span>
+                            </div>
+                            <span class="model-option-desc">Leaky Integrate-and-Fire</span>
+                        </div>
+                        <div class="model-option" data-model="if">
+                            <div class="model-option-header">
+                                <span class="model-option-title">IF</span>
+                                <span class="model-option-badge">Simple</span>
+                            </div>
+                            <span class="model-option-desc">Integrate-and-Fire (no leak)</span>
+                        </div>
+                        <div class="model-option" data-model="alif">
+                            <div class="model-option-header">
+                                <span class="model-option-title">ALIF</span>
+                                <span class="model-option-badge">Adaptive</span>
+                            </div>
+                            <span class="model-option-desc">Adaptive LIF with fatigue</span>
+                        </div>
+                        <div class="model-option" data-model="izhikevich">
+                            <div class="model-option-header">
+                                <span class="model-option-title">Izhikevich</span>
+                                <span class="model-option-badge">Advanced</span>
+                            </div>
+                            <span class="model-option-desc">Realistic dynamics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parameters -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">🎛️</span>
+                        Parameters
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label class="control-label">
+                            Threshold Voltage
+                            <span class="control-value" id="thresholdValue">1.0</span>
+                        </label>
+                        <input type="range" id="threshold" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">
+                            Leak Rate (τ)
+                            <span class="control-value" id="leakValue">0.95</span>
+                        </label>
+                        <input type="range" id="leak" min="0.8" max="0.99" step="0.01" value="0.95">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">
+                            Input Current
+                            <span class="control-value" id="inputValue">0.15</span>
+                        </label>
+                        <input type="range" id="input" min="0" max="0.5" step="0.01" value="0.15">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">
+                            Noise Level
+                            <span class="control-value" id="noiseValue">0.05</span>
+                        </label>
+                        <input type="range" id="noise" min="0" max="0.2" step="0.01" value="0.05">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">
+                            Simulation Speed
+                            <span class="control-value" id="speedValue">1x</span>
+                        </label>
+                        <input type="range" id="speed" min="0.5" max="3" step="0.5" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Config -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">🔗</span>
+                        Network
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="control-group">
+                        <label class="control-label">Architecture</label>
+                        <select id="architecture">
+                            <option value="single">Single Neuron</option>
+                            <option value="feedforward">Feedforward (3 layers)</option>
+                            <option value="recurrent">Recurrent Network</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Encoding Method</label>
+                        <select id="encoding">
+                            <option value="rate">Rate Coding</option>
+                            <option value="temporal">Temporal Coding</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">
+                            STDP Learning
+                        </label>
+                        <select id="stdpEnabled">
+                            <option value="true">Enabled</option>
+                            <option value="false">Disabled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center - Visualization -->
+        <div class="viz-container">
+            <!-- Membrane Potential -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">📈</span>
+                        Membrane Potential
+                    </span>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">
+                        Time: <span id="timeDisplay">0.00</span>s
+                    </span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="canvas-container">
+                        <canvas id="potentialCanvas" height="250"></canvas>
+                        <div class="canvas-overlay">
+                            <div class="overlay-badge">
+                                <span class="dot dot-voltage"></span> Voltage
+                            </div>
+                            <div class="overlay-badge">
+                                <span class="dot dot-threshold"></span> Threshold
+                            </div>
+                            <div class="overlay-badge">
+                                <span class="dot dot-spike"></span> Spikes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="spikeCount">0</div>
+                    <div class="stat-label">Total Spikes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="firingRate">0</div>
+                    <div class="stat-label">Firing Rate (Hz)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgVoltage">0.00</div>
+                    <div class="stat-label">Avg. Voltage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="energyUsed">0</div>
+                    <div class="stat-label">Energy Units</div>
+                </div>
+            </div>
+
+            <!-- Network / Raster Plot -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">🔥</span>
+                        Spike Raster & Network
+                    </span>
+                    <div class="tabs" style="margin: 0; border: none; padding: 0;">
+                        <button class="tab active" data-tab="raster">Raster</button>
+                        <button class="tab" data-tab="network">Network</button>
+                        <button class="tab" data-tab="stdp">STDP</button>
+                    </div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="tab-content active" id="rasterTab">
+                        <div class="canvas-container">
+                            <canvas id="rasterCanvas" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="networkTab">
+                        <div class="canvas-container network-viz">
+                            <canvas id="networkCanvas" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="stdpTab">
+                        <div class="stdp-viz">
+                            <div class="stdp-neuron pre" id="preNeuron">A</div>
+                            <div class="stdp-connection">
+                                <div class="stdp-arrow" id="stdpArrow"></div>
+                                <span class="stdp-weight">Weight: <span id="stdpWeight">1.00</span></span>
+                            </div>
+                            <div class="stdp-neuron post" id="postNeuron">B</div>
+                        </div>
+                        <div style="padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+                            STDP: If A fires before B → Connection strengthens<br>
+                            If A fires after B → Connection weakens
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Comparison -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">⚡</span>
+                        Energy Efficiency
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.9rem;">Traditional NN (GPU)</span>
+                            <span style="color: var(--accent-danger); font-weight: 600;" id="gpuEnergy">100%</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill high" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.9rem;">Neuromorphic (SNN)</span>
+                            <span style="color: var(--accent-success); font-weight: 600;" id="snnEnergy">12%</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill low" id="snnEnergyBar" style="width: 12%"></div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                        SNNs use sparse spike-based computation, dramatically reducing energy consumption compared to continuous-valued neural networks.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Information -->
+        <aside class="info-panel">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">📚</span>
+                        Model Information
+                    </span>
+                </div>
+                <div class="card-body" id="modelInfo">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">🔬</span>
+                        Encoding Demo
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        How information is represented in spikes:
+                    </p>
+                    <div class="encoding-demo">
+                        <div class="encoding-box">
+                            <h5>Rate Coding</h5>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                More spikes = stronger signal
+                            </p>
+                            <div class="spike-train" id="rateCoding"></div>
+                        </div>
+                        <div class="encoding-box">
+                            <h5>Temporal Coding</h5>
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                                Timing of spikes matters
+                            </p>
+                            <div class="spike-train" id="temporalCoding"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 1rem;">
+                <div class="card-header">
+                    <span class="card-title">
+                        <span class="icon">🆚</span>
+                        Comparison
+                    </span>
+                </div>
+                <div class="card-body">
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Feature</th>
+                            <th>Traditional</th>
+                            <th>Neuromorphic</th>
+                        </tr>
+                        <tr>
+                            <td>Signal</td>
+                            <td>Continuous</td>
+                            <td class="highlight">Spikes</td>
+                        </tr>
+                        <tr>
+                            <td>Computation</td>
+                            <td>Always active</td>
+                            <td class="highlight">Event-driven</td>
+                        </tr>
+                        <tr>
+                            <td>Energy</td>
+                            <td>High</td>
+                            <td class="highlight">Very low</td>
+                        </tr>
+                        <tr>
+                            <td>Time</td>
+                            <td>Ignored</td>
+                            <td class="highlight">Critical</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ========== SIMULATION STATE ==========
+        const state = {
+            running: false,
+            time: 0,
+            model: 'lif',
+            architecture: 'single',
+            encoding: 'rate',
+            stdpEnabled: true,
+
+            // Parameters
+            threshold: 1.0,
+            leak: 0.95,
+            inputCurrent: 0.15,
+            noise: 0.05,
+            speed: 1,
+
+            // Neuron states
+            neurons: [],
+            connections: [],
+            
+            // History
+            voltageHistory: [],
+            spikeHistory: [],
+            
+            // Stats
+            spikeCount: 0,
+            totalVoltage: 0,
+            voltageCount: 0,
+            energyUsed: 0,
+
+            // STDP
+            stdpWeight: 1.0,
+            preFireTime: null,
+            postFireTime: null,
+
+            // Izhikevich params
+            izh_a: 0.02,
+            izh_b: 0.2,
+            izh_c: -65,
+            izh_d: 8,
+            izh_u: 0
+        };
+
+        // Model information content
+        const modelInfo = {
+            lif: {
+                title: "Leaky Integrate-and-Fire (LIF)",
+                badge: "Most Used",
+                description: "The standard model in neuromorphic computing. Voltage decays over time (leak), requiring continuous input to fire.",
+                formula: "τ·dV/dt = -V + R·I",
+                features: [
+                    "Membrane voltage leaks over time",
+                    "Fires when threshold reached",
+                    "Resets after spike",
+                    "Computationally efficient"
+                ],
+                usage: "Intel Loihi, IBM TrueNorth, most SNN research"
+            },
+            if: {
+                title: "Integrate-and-Fire (IF)",
+                badge: "Simplest",
+                description: "The simplest neuron model. Integrates inputs perfectly without any decay - has 'perfect memory'.",
+                formula: "dV/dt = I (no leak term)",
+                features: [
+                    "No voltage decay",
+                    "Perfect integration",
+                    "Unrealistic but educational",
+                    "Fastest computation"
+                ],
+                usage: "Basic demonstrations, theoretical analysis"
+            },
+            alif: {
+                title: "Adaptive LIF (ALIF)",
+                badge: "Adaptive",
+                description: "Extends LIF with an adaptive threshold. Neurons that fire repeatedly become harder to activate - mimics biological fatigue.",
+                formula: "LIF + adaptive threshold: θ → θ + Δθ",
+                features: [
+                    "Dynamic threshold adaptation",
+                    "Mimics neural fatigue",
+                    "Better temporal coding",
+                    "Used in speech recognition"
+                ],
+                usage: "Temporal pattern recognition, speech processing"
+            },
+            izhikevich: {
+                title: "Izhikevich Model",
+                badge: "Advanced",
+                description: "Combines biological realism with computational efficiency. Can reproduce 20+ firing patterns of real neurons.",
+                formula: "dv/dt = 0.04v² + 5v + 140 - u + I",
+                features: [
+                    "Bursting behavior",
+                    "Oscillations",
+                    "Multiple neuron types",
+                    "Rich dynamics"
+                ],
+                usage: "Neuroscience research, realistic brain simulations"
+            }
+        };
+
+        // ========== CANVAS SETUP ==========
+        const potentialCanvas = document.getElementById('potentialCanvas');
+        const potentialCtx = potentialCanvas.getContext('2d');
+        const rasterCanvas = document.getElementById('rasterCanvas');
+        const rasterCtx = rasterCanvas.getContext('2d');
+        const networkCanvas = document.getElementById('networkCanvas');
+        const networkCtx = networkCanvas.getContext('2d');
+
+        function resizeCanvases() {
+            const containers = document.querySelectorAll('.canvas-container');
+            containers.forEach(container => {
+                const canvas = container.querySelector('canvas');
+                if (canvas) {
+                    canvas.width = container.clientWidth;
+                }
+            });
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
+
+        // ========== NEURON MODELS ==========
+        class Neuron {
+            constructor(id, x, y) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.voltage = 0;
+                this.threshold = state.threshold;
+                this.adaptiveThreshold = 0;
+                this.recovery = 0; // For Izhikevich
+                this.lastSpikeTime = -1000;
+                this.spikeHistory = [];
+            }
+
+            update(input, dt) {
+                const noise = (Math.random() - 0.5) * state.noise * 2;
+                const totalInput = input + noise;
+
+                switch(state.model) {
+                    case 'if':
+                        this.voltage += totalInput * dt * 50;
+                        break;
+                    
+                    case 'lif':
+                        this.voltage = this.voltage * state.leak + totalInput * dt * 50;
+                        break;
+                    
+                    case 'alif':
+                        this.voltage = this.voltage * state.leak + totalInput * dt * 50;
+                        this.adaptiveThreshold *= 0.99; // Decay
+                        break;
+                    
+                    case 'izhikevich':
+                        const v = this.voltage * 100 - 65; // Scale to mV
+                        const u = this.recovery;
+                        const I = totalInput * 100;
+                        
+                        const dv = (0.04 * v * v + 5 * v + 140 - u + I) * dt;
+                        const du = state.izh_a * (state.izh_b * v - u) * dt;
+                        
+                        this.voltage = (v + dv + 65) / 100;
+                        this.recovery = u + du;
+                        break;
+                }
+
+                // Check for spike
+                const effectiveThreshold = state.threshold + this.adaptiveThreshold;
+                if (this.voltage >= effectiveThreshold) {
+                    this.spike();
+                    return true;
+                }
+                return false;
+            }
+
+            spike() {
+                this.spikeHistory.push(state.time);
+                this.lastSpikeTime = state.time;
+                
+                if (state.model === 'izhikevich') {
+                    this.voltage = (state.izh_c + 65) / 100;
+                    this.recovery += state.izh_d;
+                } else {
+                    this.voltage = 0;
+                }
+
+                if (state.model === 'alif') {
+                    this.adaptiveThreshold += 0.2;
+                }
+            }
+        }
+
+        // ========== NETWORK INITIALIZATION ==========
+        function initNetwork() {
+            state.neurons = [];
+            state.connections = [];
+            state.voltageHistory = [];
+            state.spikeHistory = [];
+            state.spikeCount = 0;
+            state.totalVoltage = 0;
+            state.voltageCount = 0;
+            state.energyUsed = 0;
+            state.time = 0;
+            state.stdpWeight = 1.0;
+            state.preFireTime = null;
+            state.postFireTime = null;
+
+            const canvas = networkCanvas;
+            const width = canvas.width || 400;
+            const height = canvas.height || 300;
+
+            switch(state.architecture) {
+                case 'single':
+                    state.neurons.push(new Neuron(0, width/2, height/2));
+                    break;
+                
+                case 'feedforward':
+                    // 3 layers: 3-4-2
+                    const layers = [3, 4, 2];
+                    let neuronId = 0;
+                    layers.forEach((count, layerIdx) => {
+                        for (let i = 0; i < count; i++) {
+                            const x = (layerIdx + 1) * width / (layers.length + 1);
+                            const y = (i + 1) * height / (count + 1);
+                            state.neurons.push(new Neuron(neuronId++, x, y));
+                        }
+                    });
+                    
+                    // Connect layers
+                    let idx = 0;
+                    for (let l = 0; l < layers.length - 1; l++) {
+                        const fromStart = idx;
+                        const fromEnd = idx + layers[l];
+                        const toStart = fromEnd;
+                        const toEnd = toStart + layers[l + 1];
+                        
+                        for (let i = fromStart; i < fromEnd; i++) {
+                            for (let j = toStart; j < toEnd; j++) {
+                                state.connections.push({
+                                    from: i,
+                                    to: j,
+                                    weight: Math.random() * 0.5 + 0.5
+                                });
+                            }
+                        }
+                        idx = fromEnd;
+                    }
+                    break;
+                
+                case 'recurrent':
+                    // 5 neurons with recurrent connections
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i / 5) * Math.PI * 2 - Math.PI/2;
+                        const x = width/2 + Math.cos(angle) * 80;
+                        const y = height/2 + Math.sin(angle) * 80;
+                        state.neurons.push(new Neuron(i, x, y));
+                    }
+                    
+                    // Recurrent connections
+                    for (let i = 0; i < 5; i++) {
+                        state.connections.push({
+                            from: i,
+                            to: (i + 1) % 5,
+                            weight: Math.random() * 0.3 + 0.2
+                        });
+                        if (Math.random() > 0.5) {
+                            state.connections.push({
+                                from: i,
+                                to: (i + 2) % 5,
+                                weight: Math.random() * 0.2 + 0.1
+                            });
+                        }
+                    }
+                    break;
+            }
+
+            updateModelInfo();
+            updateEncodingDemo();
+        }
+
+        // ========== SIMULATION LOOP ==========
+        let animationId = null;
+        let lastTimestamp = 0;
+
+        function simulate(timestamp) {
+            if (!state.running) return;
+
+            const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.1) * state.speed;
+            lastTimestamp = timestamp;
+
+            state.time += dt;
+
+            // Update neurons
+            let anySpike = false;
+            const spikingNeurons = [];
+
+            state.neurons.forEach((neuron, idx) => {
+                let input = state.inputCurrent;
+                
+                // Add input from connections
+                state.connections.forEach(conn => {
+                    if (conn.to === idx) {
+                        const fromNeuron = state.neurons[conn.from];
+                        if (state.time - fromNeuron.lastSpikeTime < 0.02) {
+                            input += conn.weight * 0.5;
+                        }
+                    }
+                });
+
+                // External input for first layer
+                if (state.architecture !== 'single' && idx < 3) {
+                    input += state.inputCurrent * (1 + Math.sin(state.time * 5 + idx) * 0.5);
+                }
+
+                const spiked = neuron.update(input, dt);
+                if (spiked) {
+                    anySpike = true;
+                    spikingNeurons.push(idx);
+                    state.spikeCount++;
+                    state.energyUsed += 0.1;
+
+                    // STDP updates
+                    if (state.stdpEnabled) {
+                        if (idx === 0) {
+                            state.preFireTime = state.time;
+                        } else {
+                            state.postFireTime = state.time;
+                        }
+                        updateSTDP();
+                    }
+                }
+            });
+
+            // Record history
+            if (state.neurons.length > 0) {
+                const mainNeuron = state.neurons[0];
+                state.voltageHistory.push({
+                    time: state.time,
+                    voltage: mainNeuron.voltage,
+                    threshold: state.threshold + mainNeuron.adaptiveThreshold
+                });
+                state.totalVoltage += mainNeuron.voltage;
+                state.voltageCount++;
+
+                // Keep history limited
+                if (state.voltageHistory.length > 500) {
+                    state.voltageHistory.shift();
+                }
+            }
+
+            // Record spikes
+            spikingNeurons.forEach(idx => {
+                state.spikeHistory.push({
+                    time: state.time,
+                    neuronId: idx
+                });
+            });
+            if (state.spikeHistory.length > 200) {
+                state.spikeHistory = state.spikeHistory.slice(-200);
+            }
+
+            // Energy calculation for display
+            const activeRatio = spikingNeurons.length / Math.max(1, state.neurons.length);
+            const snnEnergy = Math.max(5, Math.round(12 + activeRatio * 20));
+            document.getElementById('snnEnergy').textContent = snnEnergy + '%';
+            document.getElementById('snnEnergyBar').style.width = snnEnergy + '%';
+
+            // Update displays
+            updateDisplays();
+            render();
+
+            animationId = requestAnimationFrame(simulate);
+        }
+
+        // ========== STDP UPDATE ==========
+        function updateSTDP() {
+            if (state.preFireTime !== null && state.postFireTime !== null) {
+                const dt = state.postFireTime - state.preFireTime;
+                
+                if (Math.abs(dt) < 0.1) {
+                    if (dt > 0) {
+                        // Pre before post -> strengthen
+                        state.stdpWeight = Math.min(2, state.stdpWeight + 0.05 * Math.exp(-Math.abs(dt) * 10));
+                        document.getElementById('stdpArrow').className = 'stdp-arrow strengthened';
+                    } else {
+                        // Post before pre -> weaken
+                        state.stdpWeight = Math.max(0.1, state.stdpWeight - 0.03 * Math.exp(-Math.abs(dt) * 10));
+                        document.getElementById('stdpArrow').className = 'stdp-arrow weakened';
+                    }
+                    
+                    // Update connection weights
+                    state.connections.forEach(conn => {
+                        if (conn.from === 0) {
+                            conn.weight *= (dt > 0 ? 1.02 : 0.98);
+                            conn.weight = Math.max(0.1, Math.min(2, conn.weight));
+                        }
+                    });
+                }
+            }
+            
+            document.getElementById('stdpWeight').textContent = state.stdpWeight.toFixed(2);
+        }
+
+        // ========== RENDERING ==========
+        function render() {
+            renderPotential();
+            renderRaster();
+            renderNetwork();
+        }
+
+        function renderPotential() {
+            const ctx = potentialCtx;
+            const canvas = potentialCanvas;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear
+            ctx.fillStyle = '#0f1419';
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(55, 65, 81, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = (i / 4) * height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            if (state.voltageHistory.length < 2) return;
+
+            const history = state.voltageHistory;
+            const timeWindow = 5; // seconds
+            const startTime = Math.max(0, state.time - timeWindow);
+            
+            // Draw threshold line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const thresholdY = height - (state.threshold / 1.5) * height;
+            ctx.moveTo(0, thresholdY);
+            ctx.lineTo(width, thresholdY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw voltage
+            const gradient = ctx.createLinearGradient(0, height, 0, 0);
+            gradient.addColorStop(0, '#06b6d4');
+            gradient.addColorStop(1, '#8b5cf6');
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let first = true;
+            history.forEach((point, i) => {
+                if (point.time < startTime) return;
+                
+                const x = ((point.time - startTime) / timeWindow) * width;
+                const y = height - (Math.min(point.voltage, 1.5) / 1.5) * height;
+                
+                if (first) {
+                    ctx.moveTo(x, y);
+                    first = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            // Glow effect
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Draw spikes
+            ctx.fillStyle = '#f59e0b';
+            state.spikeHistory.forEach(spike => {
+                if (spike.time >= startTime && spike.neuronId === 0) {
+                    const x = ((spike.time - startTime) / timeWindow) * width;
+                    ctx.beginPath();
+                    ctx.arc(x, 10, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+
+        function renderRaster() {
+            const ctx = rasterCtx;
+            const canvas = rasterCanvas;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear
+            ctx.fillStyle = '#0f1419';
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(55, 65, 81, 0.3)';
+            ctx.lineWidth = 1;
+            const numNeurons = Math.max(1, state.neurons.length);
+            for (let i = 0; i <= numNeurons; i++) {
+                const y = (i / numNeurons) * height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            const timeWindow = 5;
+            const startTime = Math.max(0, state.time - timeWindow);
+
+            // Draw spikes
+            const colors = ['#f59e0b', '#10b981', '#6366f1', '#ef4444', '#8b5cf6'];
+            
+            state.spikeHistory.forEach(spike => {
+                if (spike.time >= startTime) {
+                    const x = ((spike.time - startTime) / timeWindow) * width;
+                    const y = ((spike.neuronId + 0.5) / numNeurons) * height;
+                    
+                    ctx.fillStyle = colors[spike.neuronId % colors.length];
+                    ctx.fillRect(x - 2, y - 8, 4, 16);
+                    
+                    // Glow
+                    ctx.shadowColor = colors[spike.neuronId % colors.length];
+                    ctx.shadowBlur = 5;
+                    ctx.fillRect(x - 2, y - 8, 4, 16);
+                    ctx.shadowBlur = 0;
+                }
+            });
+
+            // Neuron labels
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '12px Inter, sans-serif';
+            for (let i = 0; i < numNeurons; i++) {
+                const y = ((i + 0.5) / numNeurons) * height;
+                ctx.fillText(`N${i}`, 5, y + 4);
+            }
+        }
+
+        function renderNetwork() {
+            const ctx = networkCtx;
+            const canvas = networkCanvas;
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear
+            ctx.fillStyle = '#0f1419';
+            ctx.fillRect(0, 0, width, height);
+
+            if (state.neurons.length === 0) return;
+
+            // Draw connections
+            state.connections.forEach(conn => {
+                const from = state.neurons[conn.from];
+                const to = state.neurons[conn.to];
+                
+                const isActive = state.time - from.lastSpikeTime < 0.05;
+                
+                ctx.strokeStyle = isActive ? '#f59e0b' : `rgba(99, 102, 241, ${0.3 + conn.weight * 0.3})`;
+                ctx.lineWidth = isActive ? 3 : 1 + conn.weight;
+                
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.stroke();
+                
+                if (isActive) {
+                    ctx.shadowColor = '#f59e0b';
+                    ctx.shadowBlur = 10;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+            });
+
+            // Draw neurons
+            state.neurons.forEach((neuron, idx) => {
+                const isRecent = state.time - neuron.lastSpikeTime < 0.1;
+                const isFiring = state.time - neuron.lastSpikeTime < 0.02;
+                
+                // Neuron body
+                const radius = 20 + (isFiring ? 10 : 0);
+                
+                const gradient = ctx.createRadialGradient(
+                    neuron.x, neuron.y, 0,
+                    neuron.x, neuron.y, radius
+                );
+                
+                if (isFiring) {
+                    gradient.addColorStop(0, '#f59e0b');
+                    gradient.addColorStop(1, 'rgba(245, 158, 11, 0.3)');
+                } else if (isRecent) {
+                    gradient.addColorStop(0, '#10b981');
+                    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.3)');
+                } else {
+                    const voltageRatio = Math.min(1, neuron.voltage / state.threshold);
+                    gradient.addColorStop(0, `rgba(99, 102, 241, ${0.5 + voltageRatio * 0.5})`);
+                    gradient.addColorStop(1, `rgba(99, 102, 241, ${0.1 + voltageRatio * 0.2})`);
+                }
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(neuron.x, neuron.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Border
+                ctx.strokeStyle = isFiring ? '#fbbf24' : '#6366f1';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Voltage indicator
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText((neuron.voltage * 100).toFixed(0) + '%', neuron.x, neuron.y + 4);
+            });
+        }
+
+        // ========== DISPLAY UPDATES ==========
+        function updateDisplays() {
+            document.getElementById('timeDisplay').textContent = state.time.toFixed(2);
+            document.getElementById('spikeCount').textContent = state.spikeCount;
+            
+            const firingRate = state.time > 0 ? (state.spikeCount / state.time).toFixed(1) : 0;
+            document.getElementById('firingRate').textContent = firingRate;
+            
+            const avgVoltage = state.voltageCount > 0 ? (state.totalVoltage / state.voltageCount).toFixed(2) : 0;
+            document.getElementById('avgVoltage').textContent = avgVoltage;
+            
+            document.getElementById('energyUsed').textContent = state.energyUsed.toFixed(1);
+        }
+
+        function updateModelInfo() {
+            const info = modelInfo[state.model];
+            const container = document.getElementById('modelInfo');
+            
+            container.innerHTML = `
+                <div class="info-section">
+                    <h4>
+                        ${info.title}
+                        <span class="model-option-badge">${info.badge}</span>
+                    </h4>
+                    <p>${info.description}</p>
+                    <div class="formula-box">${info.formula}</div>
+                </div>
+                <div class="info-section">
+                    <h4>⚙️ Key Features</h4>
+                    <ul class="feature-list">
+                        ${info.features.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="info-section">
+                    <h4>🎯 Usage</h4>
+                    <p>${info.usage}</p>
+                </div>
+            `;
+        }
+
+        function updateEncodingDemo() {
+            const rateContainer = document.getElementById('rateCoding');
+            const temporalContainer = document.getElementById('temporalCoding');
+            
+            // Clear
+            rateContainer.innerHTML = '';
+            temporalContainer.innerHTML = '';
+            
+            // Rate coding - many evenly spaced spikes
+            for (let i = 0; i < 20; i++) {
+                const spike = document.createElement('div');
+                spike.className = 'spike-marker';
+                spike.style.height = (Math.random() * 10 + 15) + 'px';
+                rateContainer.appendChild(spike);
+            }
+            
+            // Temporal coding - specific timing pattern
+            const pattern = [1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0];
+            pattern.forEach(hasSpike => {
+                const marker = document.createElement('div');
+                marker.className = 'spike-marker';
+                marker.style.height = hasSpike ? (Math.random() * 10 + 15) + 'px' : '0px';
+                marker.style.width = hasSpike ? '3px' : '3px';
+                marker.style.background = hasSpike ? 'var(--accent-warning)' : 'transparent';
+                temporalContainer.appendChild(marker);
+            });
+        }
+
+        // ========== CONTROLS ==========
+        function toggleSimulation() {
+            state.running = !state.running;
+            const btn = document.getElementById('playBtn');
+            
+            if (state.running) {
+                btn.innerHTML = '⏸️ Pause';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-danger');
+                lastTimestamp = performance.now();
+                animationId = requestAnimationFrame(simulate);
+                showToast('🚀', 'Simulation started');
+            } else {
+                btn.innerHTML = '▶️ Start';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-primary');
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                showToast('⏸️', 'Simulation paused');
+            }
+        }
+
+        function resetSimulation() {
+            state.running = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            const btn = document.getElementById('playBtn');
+            btn.innerHTML = '▶️ Start';
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-primary');
+            
+            initNetwork();
+            render();
+            updateDisplays();
+            
+            showToast('🔄', 'Simulation reset');
+        }
+
+        function exportData() {
+            const data = {
+                model: state.model,
+                architecture: state.architecture,
+                parameters: {
+                    threshold: state.threshold,
+                    leak: state.leak,
+                    inputCurrent: state.inputCurrent,
+                    noise: state.noise
+                },
+                statistics: {
+                    totalTime: state.time,
+                    spikeCount: state.spikeCount,
+                    firingRate: state.time > 0 ? state.spikeCount / state.time : 0,
+                    energyUsed: state.energyUsed
+                },
+                voltageHistory: state.voltageHistory.slice(-100),
+                spikeHistory: state.spikeHistory
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `neuromorphic_sim_${Date.now()}.json`;
+            a.click();
+            
+            showToast('📊', 'Data exported successfully');
+        }
+
+        function showToast(icon, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ========== EVENT LISTENERS ==========
+        // Model selector
+        document.querySelectorAll('.model-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                state.model = option.dataset.model;
+                initNetwork();
+                render();
+            });
+        });
+
+        // Parameter sliders
+        document.getElementById('threshold').addEventListener('input', (e) => {
+            state.threshold = parseFloat(e.target.value);
+            document.getElementById('thresholdValue').textContent = state.threshold.toFixed(1);
+        });
+
+        document.getElementById('leak').addEventListener('input', (e) => {
+            state.leak = parseFloat(e.target.value);
+            document.getElementById('leakValue').textContent = state.leak.toFixed(2);
+        });
+
+        document.getElementById('input').addEventListener('input', (e) => {
+            state.inputCurrent = parseFloat(e.target.value);
+            document.getElementById('inputValue').textContent = state.inputCurrent.toFixed(2);
+        });
+
+        document.getElementById('noise').addEventListener('input', (e) => {
+            state.noise = parseFloat(e.target.value);
+            document.getElementById('noiseValue').textContent = state.noise.toFixed(2);
+        });
+
+        document.getElementById('speed').addEventListener('input', (e) => {
+            state.speed = parseFloat(e.target.value);
+            document.getElementById('speedValue').textContent = state.speed + 'x';
+        });
+
+        // Network config
+        document.getElementById('architecture').addEventListener('change', (e) => {
+            state.architecture = e.target.value;
+            initNetwork();
+            render();
+        });
+
+        document.getElementById('encoding').addEventListener('change', (e) => {
+            state.encoding = e.target.value;
+            updateEncodingDemo();
+        });
+
+        document.getElementById('stdpEnabled').addEventListener('change', (e) => {
+            state.stdpEnabled = e.target.value === 'true';
+        });
+
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            });
+        });
+
+        // STDP neuron click simulation
+        document.getElementById('preNeuron').addEventListener('click', () => {
+            state.preFireTime = state.time;
+            document.getElementById('preNeuron').classList.add('firing');
+            setTimeout(() => document.getElementById('preNeuron').classList.remove('firing'), 200);
+            updateSTDP();
+        });
+
+        document.getElementById('postNeuron').addEventListener('click', () => {
+            state.postFireTime = state.time;
+            document.getElementById('postNeuron').classList.add('firing');
+            setTimeout(() => document.getElementById('postNeuron').classList.remove('firing'), 200);
+            updateSTDP();
+        });
+
+        // ========== INITIALIZATION ==========
+        initNetwork();
+        render();
+        updateDisplays();
+
+        // Periodic encoding demo update
+        setInterval(updateEncodingDemo, 2000);
+    </script>
+</body>
+</html>
