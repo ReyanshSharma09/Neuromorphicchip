@@ -1,6 +1,3 @@
-# Interactive SNN - Type or Draw Numbers
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1017,30 +1014,3 @@ window.onload = function () {
 </script>
 </body>
 </html>
-```
-
-## How to Use:
-
-1. **Save as `snn.html`** and open in browser
-2. **Type a number** (0-9) in the input box OR click a quick button
-3. **Click "⚡ RECOGNIZE"**
-4. **Watch** the animation:
-   - Pixel grid lights up showing the digit encoding
-   - Network canvas shows spikes firing through layers
-   - Raster plot shows spike timing
-   - Output bars fill up as output neurons accumulate spikes
-   - Winner is highlighted in the result box
-
-## What Happens:
-
-| Step | What You See |
-|------|-------------|
-| **Input** | Digit → 8×8 pixel grid → spike rate encoding |
-| **Network** | Green spikes (input) → Gold spikes (hidden) → Pink spikes (output) |
-| **Raster** | Each dot = one spike, time moves left→right |
-| **Output** | 10 bars compete, highest spike count wins |
-
-## Controls:
-- **Type** or click **0-9 buttons** to set input
-- **Slider**: Duration, Threshold, Rate, Synaptic Strength
-- **Draw tab**: Draw digits with mouse instead of typing
