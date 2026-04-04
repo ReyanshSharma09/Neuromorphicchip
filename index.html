@@ -3,494 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neuromorphic Chip Simulator</title>
+    <title>Neuromorphic Chip - Full Spike Flow</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --bg: #0a0a12;
-            --card: #14141f;
-            --border: #2a2a3d;
+            --bg: #080810;
+            --card: #101018;
+            --border: #1a1a2e;
             --text: #fff;
-            --dim: #999;
-            --muted: #666;
-            --input: #00d4ff;
-            --hidden: #a855f7;
-            --output: #22c55e;
-            --spike: #ff9500;
+            --dim: #888;
+            --input: #00e5ff;
+            --hidden: #aa55ff;
+            --output: #00ff6a;
+            --spike: #ff8800;
         }
-
+        
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding: 1rem;
+            padding: 0.75rem;
             min-height: 100vh;
         }
-
+        
         h1 {
             text-align: center;
-            font-size: 1.4rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(90deg, var(--input), var(--hidden), var(--output));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-
-        .subtitle {
-            text-align: center;
-            color: var(--dim);
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .container {
+        
+        .sub { text-align: center; color: var(--dim); font-size: 0.8rem; margin-bottom: 1rem; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 260px 1fr 280px;
+            gap: 1rem;
             max-width: 1400px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 280px 1fr 300px;
-            gap: 1.5rem;
         }
-
-        @media (max-width: 1100px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: 1fr; }
         }
-
+        
         .panel {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
+            padding: 0.75rem;
             margin-bottom: 0.75rem;
+        }
+        
+        .title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
-
-        /* Canvas */
-        #drawCanvas {
+        
+        #canvas {
             width: 100%;
             aspect-ratio: 1;
             background: #000;
             border: 2px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: crosshair;
-            display: block;
         }
-
-        .btn-grid {
+        
+        .btns {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 0.4rem;
-            margin-top: 0.75rem;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
         }
-
+        
         .btn {
-            padding: 0.5rem;
+            padding: 0.4rem;
             background: var(--border);
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             color: var(--text);
+            font-size: 0.75rem;
             cursor: pointer;
-            font-size: 0.8rem;
-            transition: 0.2s;
         }
-
-        .btn:hover {
-            background: var(--input);
-            color: #000;
-        }
-
-        .btn-process {
+        
+        .btn:hover { background: var(--input); color: #000; }
+        
+        .go {
             width: 100%;
-            padding: 0.9rem;
-            margin-top: 0.75rem;
-            background: linear-gradient(135deg, var(--output), #15803d);
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, var(--output), #009944);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
         }
-
-        .btn-process:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(34,197,94,0.4);
-        }
-
-        .btn-process:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Network Canvas */
-        #networkCanvas {
+        
+        .go:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,255,106,0.3); }
+        .go:disabled { opacity: 0.5; }
+        
+        /* Network */
+        #netCanvas {
             width: 100%;
-            height: 250px;
+            height: 220px;
             background: #000;
-            border-radius: 10px;
+            border-radius: 8px;
         }
-
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.65rem;
+            color: var(--dim);
+        }
+        
+        .leg { display: flex; align-items: center; gap: 0.3rem; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        
         /* Spike Tracks */
-        .layer-section {
-            margin-bottom: 0.75rem;
+        .layer {
+            margin-bottom: 0.5rem;
         }
-
-        .layer-header {
+        
+        .layer-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.3rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.2rem;
         }
-
-        .layer-label {
-            font-size: 0.75rem;
-            color: var(--dim);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .layer-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .layer-count {
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        .spike-track {
-            height: 45px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
+        
+        .layer-name { color: var(--dim); display: flex; align-items: center; gap: 0.3rem; }
+        .layer-num { font-weight: 700; }
+        
+        .track {
+            height: 40px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 6px;
             display: flex;
             align-items: flex-end;
+            padding: 3px;
             gap: 2px;
-            padding: 4px;
             overflow: hidden;
         }
-
-        .spike-bar {
-            width: 5px;
+        
+        .bar {
+            width: 4px;
             border-radius: 2px;
             flex-shrink: 0;
-            animation: spikeIn 0.15s ease;
+            animation: pop 0.1s;
         }
-
-        @keyframes spikeIn {
+        
+        @keyframes pop {
             from { transform: scaleY(0); }
             to { transform: scaleY(1); }
         }
-
+        
         /* Race */
-        .race-list {
-            max-height: 400px;
+        .race-wrap {
+            max-height: 320px;
             overflow-y: auto;
         }
-
-        .race-item {
+        
+        .race {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            margin-bottom: 0.4rem;
+            gap: 0.4rem;
+            padding: 0.4rem;
+            margin-bottom: 0.3rem;
             background: rgba(0,0,0,0.3);
-            border-radius: 8px;
+            border-radius: 6px;
             border: 2px solid transparent;
-            transition: 0.2s;
+            transition: 0.15s;
         }
-
-        .race-item.winner {
-            background: rgba(34,197,94,0.2);
+        
+        .race.win {
+            background: rgba(0,255,106,0.15);
             border-color: var(--output);
         }
-
-        .race-item.firing {
+        
+        .race.fire {
             border-color: var(--spike);
-            box-shadow: 0 0 15px rgba(255,149,0,0.4);
+            box-shadow: 0 0 10px rgba(255,136,0,0.4);
         }
-
+        
         .race-rank {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             background: var(--border);
             border-radius: 50%;
+            font-size: 0.6rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65rem;
-            font-weight: 700;
         }
-
-        .race-item.winner .race-rank {
-            background: var(--output);
-            color: #000;
-        }
-
-        .race-icon {
-            font-size: 1.3rem;
-            width: 30px;
-            text-align: center;
-        }
-
-        .race-info {
-            flex: 1;
-        }
-
-        .race-name {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
+        
+        .race.win .race-rank { background: var(--output); color: #000; }
+        
+        .race-icon { font-size: 1.2rem; width: 28px; text-align: center; }
+        
+        .race-info { flex: 1; }
+        .race-name { font-size: 0.75rem; font-weight: 600; }
+        
         .race-bar-bg {
-            height: 5px;
+            height: 4px;
             background: var(--border);
-            border-radius: 3px;
-            margin-top: 0.25rem;
+            border-radius: 2px;
+            margin-top: 0.2rem;
         }
-
+        
         .race-bar {
             height: 100%;
             background: var(--input);
-            border-radius: 3px;
-            transition: 0.15s;
+            border-radius: 2px;
+            transition: 0.1s;
         }
-
-        .race-item.winner .race-bar {
-            background: var(--output);
-        }
-
-        .race-count {
-            font-size: 1.1rem;
+        
+        .race.win .race-bar { background: var(--output); }
+        
+        .race-cnt {
+            font-size: 1rem;
             font-weight: 700;
             color: var(--spike);
-            min-width: 35px;
+            min-width: 30px;
             text-align: right;
         }
-
+        
         /* Result */
-        .result-waiting {
+        .result-wait {
             text-align: center;
-            padding: 2rem;
-            color: var(--muted);
+            padding: 1.5rem;
+            color: var(--dim);
         }
-
-        .result-icon-waiting {
-            font-size: 3rem;
-            opacity: 0.3;
-        }
-
-        .result-content {
+        
+        .result-wait-icon { font-size: 2.5rem; opacity: 0.3; }
+        
+        .result {
             display: none;
             text-align: center;
         }
-
-        .result-content.show {
+        
+        .result.show {
             display: block;
             animation: fadeIn 0.4s;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.9); }
             to { opacity: 1; transform: scale(1); }
         }
-
-        .result-main-icon {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .result-type {
-            display: inline-block;
-            background: var(--hidden);
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            margin: 0.5rem 0;
-        }
-
-        .result-stats {
+        
+        .res-icon { font-size: 3.5rem; }
+        .res-name { font-size: 1.2rem; font-weight: 700; margin: 0.25rem 0; }
+        .res-type { display: inline-block; background: var(--hidden); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.6rem; }
+        
+        .res-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
+            gap: 0.4rem;
             margin: 0.75rem 0;
         }
-
-        .stat-box {
+        
+        .stat {
             background: rgba(0,0,0,0.3);
-            padding: 0.5rem;
+            padding: 0.4rem;
             border-radius: 6px;
         }
-
-        .stat-val {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--input);
-        }
-
-        .stat-label {
-            font-size: 0.6rem;
-            color: var(--muted);
-        }
-
-        .result-explain {
-            background: rgba(34,197,94,0.1);
-            border: 1px solid rgba(34,197,94,0.3);
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-size: 0.75rem;
+        
+        .stat-val { font-size: 1rem; font-weight: 700; color: var(--input); }
+        .stat-lbl { font-size: 0.55rem; color: var(--dim); }
+        
+        .res-explain {
+            background: rgba(0,255,106,0.1);
+            border: 1px solid rgba(0,255,106,0.3);
+            border-radius: 6px;
+            padding: 0.5rem;
+            font-size: 0.7rem;
             color: var(--dim);
             text-align: left;
-            line-height: 1.5;
+            line-height: 1.4;
         }
-
-        .result-explain strong {
-            color: var(--output);
-        }
-
-        /* Debug */
-        .debug {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-family: monospace;
-            font-size: 0.7rem;
-            margin-top: 0.75rem;
-        }
-
-        .debug-title {
-            color: var(--spike);
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .debug-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.15rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        /* Progress Bar */
-        .progress-container {
+        
+        .res-explain strong { color: var(--output); }
+        
+        /* Progress */
+        .prog-wrap {
+            height: 6px;
             background: var(--border);
-            border-radius: 6px;
-            height: 8px;
-            margin-bottom: 1rem;
+            border-radius: 3px;
+            margin-bottom: 0.75rem;
             overflow: hidden;
         }
-
-        .progress-bar {
+        
+        .prog {
             height: 100%;
             background: linear-gradient(90deg, var(--input), var(--hidden), var(--output));
             width: 0%;
-            transition: width 0.1s;
+            transition: 0.1s;
         }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sbar-item { text-align: center; }
+        .sbar-val { font-size: 1.1rem; font-weight: 700; }
+        .sbar-lbl { font-size: 0.55rem; color: var(--dim); }
+        
+        /* Config */
+        .config {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+        }
+        
+        .config-item {
+            background: rgba(0,0,0,0.3);
+            padding: 0.4rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .config-val { color: var(--input); font-weight: 700; }
     </style>
 </head>
 <body>
     <h1>🧠 Neuromorphic Chip Simulator</h1>
-    <p class="subtitle">Draw → Watch spikes flow through ALL layers → See the winner</p>
+    <p class="sub">Massive neural network with guaranteed spike propagation</p>
 
-    <div class="container">
+    <div class="grid">
         <!-- LEFT -->
         <div>
             <div class="panel">
-                <div class="panel-title">✏️ Draw Input</div>
-                <canvas id="drawCanvas" width="260" height="260"></canvas>
-                <div class="btn-grid">
-                    <button class="btn" onclick="clearCanvas()">Clear</button>
-                    <button class="btn" onclick="drawChar('A')">A</button>
-                    <button class="btn" onclick="drawChar('B')">B</button>
-                    <button class="btn" onclick="drawChar('C')">C</button>
-                    <button class="btn" onclick="drawChar('O')">O</button>
-                    <button class="btn" onclick="drawChar('X')">X</button>
-                    <button class="btn" onclick="drawChar('1')">1</button>
-                    <button class="btn" onclick="drawChar('3')">3</button>
-                    <button class="btn" onclick="drawChar('5')">5</button>
-                    <button class="btn" onclick="drawChar('8')">8</button>
-                    <button class="btn" onclick="drawChar('circle')">⭕</button>
-                    <button class="btn" onclick="drawChar('square')">⬜</button>
+                <div class="title">✏️ Draw Input</div>
+                <canvas id="canvas" width="240" height="240"></canvas>
+                <div class="btns">
+                    <button class="btn" onclick="clear_()">Clear</button>
+                    <button class="btn" onclick="draw('A')">A</button>
+                    <button class="btn" onclick="draw('B')">B</button>
+                    <button class="btn" onclick="draw('C')">C</button>
+                    <button class="btn" onclick="draw('O')">O</button>
+                    <button class="btn" onclick="draw('X')">X</button>
+                    <button class="btn" onclick="draw('1')">1</button>
+                    <button class="btn" onclick="draw('3')">3</button>
+                    <button class="btn" onclick="draw('5')">5</button>
+                    <button class="btn" onclick="draw('8')">8</button>
+                    <button class="btn" onclick="draw('○')">⭕</button>
+                    <button class="btn" onclick="draw('□')">⬜</button>
                 </div>
-                <button class="btn-process" id="btnProcess" onclick="runProcess()">⚡ PROCESS</button>
+                <button class="go" id="goBtn" onclick="run()">⚡ PROCESS</button>
             </div>
 
-            <div class="debug">
-                <div class="debug-title">🔧 Live Debug</div>
-                <div class="debug-row"><span>Time Step:</span><span id="dbgTime">0</span></div>
-                <div class="debug-row"><span>Input Spikes:</span><span id="dbgInput">0</span></div>
-                <div class="debug-row"><span>Hidden Spikes:</span><span id="dbgHidden">0</span></div>
-                <div class="debug-row"><span>Output Spikes:</span><span id="dbgOutput">0</span></div>
-                <div class="debug-row"><span>Best Match:</span><span id="dbgMatch">-</span></div>
-                <div class="debug-row"><span>Leading:</span><span id="dbgLeader">-</span></div>
+            <div class="panel">
+                <div class="title">⚙️ Network Config</div>
+                <div class="config">
+                    <div class="config-item">Input Neurons<br><span class="config-val">256</span></div>
+                    <div class="config-item">Hidden Layer 1<br><span class="config-val">128</span></div>
+                    <div class="config-item">Hidden Layer 2<br><span class="config-val">64</span></div>
+                    <div class="config-item">Output Neurons<br><span class="config-val">12</span></div>
+                </div>
             </div>
         </div>
 
         <!-- CENTER -->
         <div>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
+            <div class="prog-wrap"><div class="prog" id="prog"></div></div>
+
+            <div class="stats-bar">
+                <div class="sbar-item">
+                    <div class="sbar-val" id="sTotal">0</div>
+                    <div class="sbar-lbl">TOTAL SPIKES</div>
+                </div>
+                <div class="sbar-item">
+                    <div class="sbar-val" style="color:var(--input)" id="sInput">0</div>
+                    <div class="sbar-lbl">INPUT</div>
+                </div>
+                <div class="sbar-item">
+                    <div class="sbar-val" style="color:var(--hidden)" id="sHidden">0</div>
+                    <div class="sbar-lbl">HIDDEN</div>
+                </div>
+                <div class="sbar-item">
+                    <div class="sbar-val" style="color:var(--output)" id="sOutput">0</div>
+                    <div class="sbar-lbl">OUTPUT</div>
+                </div>
             </div>
 
             <div class="panel">
-                <div class="panel-title">🔗 Neural Network - Live Spike Flow</div>
-                <canvas id="networkCanvas"></canvas>
+                <div class="title">🔗 Neural Network Visualization</div>
+                <canvas id="netCanvas"></canvas>
+                <div class="legend">
+                    <div class="leg"><div class="dot" style="background:var(--input)"></div>Input (256)</div>
+                    <div class="leg"><div class="dot" style="background:var(--hidden)"></div>Hidden (192)</div>
+                    <div class="leg"><div class="dot" style="background:var(--output)"></div>Output (12)</div>
+                    <div class="leg"><div class="dot" style="background:var(--spike)"></div>Spike!</div>
+                </div>
             </div>
 
             <div class="panel">
-                <div class="panel-title">🔥 Spike Activity by Layer</div>
+                <div class="title">🔥 Live Spike Activity</div>
                 
-                <div class="layer-section">
-                    <div class="layer-header">
-                        <div class="layer-label">
-                            <div class="layer-dot" style="background:var(--input)"></div>
-                            Input Layer (64 neurons)
-                        </div>
-                        <div class="layer-count" id="inputCount" style="color:var(--input)">0</div>
+                <div class="layer">
+                    <div class="layer-head">
+                        <div class="layer-name"><div class="dot" style="background:var(--input);width:8px;height:8px"></div>Input Layer (256)</div>
+                        <div class="layer-num" style="color:var(--input)" id="cInput">0</div>
                     </div>
-                    <div class="spike-track" id="inputTrack"></div>
+                    <div class="track" id="tInput"></div>
                 </div>
 
-                <div class="layer-section">
-                    <div class="layer-header">
-                        <div class="layer-label">
-                            <div class="layer-dot" style="background:var(--hidden)"></div>
-                            Hidden Layer (32 neurons)
-                        </div>
-                        <div class="layer-count" id="hiddenCount" style="color:var(--hidden)">0</div>
+                <div class="layer">
+                    <div class="layer-head">
+                        <div class="layer-name"><div class="dot" style="background:var(--hidden);width:8px;height:8px"></div>Hidden Layer 1 (128)</div>
+                        <div class="layer-num" style="color:var(--hidden)" id="cHidden1">0</div>
                     </div>
-                    <div class="spike-track" id="hiddenTrack"></div>
+                    <div class="track" id="tHidden1"></div>
                 </div>
 
-                <div class="layer-section">
-                    <div class="layer-header">
-                        <div class="layer-label">
-                            <div class="layer-dot" style="background:var(--output)"></div>
-                            Output Layer (12 classes)
-                        </div>
-                        <div class="layer-count" id="outputCount" style="color:var(--output)">0</div>
+                <div class="layer">
+                    <div class="layer-head">
+                        <div class="layer-name"><div class="dot" style="background:var(--hidden);width:8px;height:8px"></div>Hidden Layer 2 (64)</div>
+                        <div class="layer-num" style="color:var(--hidden)" id="cHidden2">0</div>
                     </div>
-                    <div class="spike-track" id="outputTrack"></div>
+                    <div class="track" id="tHidden2"></div>
+                </div>
+
+                <div class="layer">
+                    <div class="layer-head">
+                        <div class="layer-name"><div class="dot" style="background:var(--output);width:8px;height:8px"></div>Output Layer (12)</div>
+                        <div class="layer-num" style="color:var(--output)" id="cOutput">0</div>
+                    </div>
+                    <div class="track" id="tOutput"></div>
                 </div>
             </div>
         </div>
@@ -498,806 +457,824 @@
         <!-- RIGHT -->
         <div>
             <div class="panel">
-                <div class="panel-title">🏆 Output Competition</div>
-                <div class="race-list" id="raceList"></div>
+                <div class="title">🏆 Output Neuron Competition</div>
+                <div class="race-wrap" id="raceWrap"></div>
             </div>
 
             <div class="panel">
-                <div id="resultWaiting" class="result-waiting">
-                    <div class="result-icon-waiting">🧠</div>
-                    <div>Draw and click Process</div>
+                <div id="resWait" class="result-wait">
+                    <div class="result-wait-icon">🧠</div>
+                    <div>Draw & Process</div>
                 </div>
-                <div id="resultContent" class="result-content">
-                    <div class="result-main-icon" id="resIcon">?</div>
-                    <div class="result-name" id="resName">Unknown</div>
-                    <div class="result-type" id="resType">TYPE</div>
-                    <div class="result-stats">
-                        <div class="stat-box">
-                            <div class="stat-val" id="resWinner">0</div>
-                            <div class="stat-label">WINNER SPIKES</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-val" id="resTotal">0</div>
-                            <div class="stat-label">TOTAL OUTPUT</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-val" id="resConf">0%</div>
-                            <div class="stat-label">CONFIDENCE</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-val" id="resMargin">+0</div>
-                            <div class="stat-label">LEAD</div>
-                        </div>
+                <div id="resContent" class="result">
+                    <div class="res-icon" id="rIcon">?</div>
+                    <div class="res-name" id="rName">Unknown</div>
+                    <div class="res-type" id="rType">TYPE</div>
+                    <div class="res-stats">
+                        <div class="stat"><div class="stat-val" id="rWin">0</div><div class="stat-lbl">WINNER SPIKES</div></div>
+                        <div class="stat"><div class="stat-val" id="rTot">0</div><div class="stat-lbl">TOTAL OUTPUT</div></div>
+                        <div class="stat"><div class="stat-val" id="rConf">0%</div><div class="stat-lbl">CONFIDENCE</div></div>
+                        <div class="stat"><div class="stat-val" id="rMarg">+0</div><div class="stat-lbl">LEAD</div></div>
                     </div>
-                    <div class="result-explain" id="resExplain"></div>
+                    <div class="res-explain" id="rExplain"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // ===== OUTPUT CLASSES =====
-        const CLASSES = [
-            { id: 'A', icon: 'A', name: 'Letter A', type: 'LETTER' },
-            { id: 'B', icon: 'B', name: 'Letter B', type: 'LETTER' },
-            { id: 'C', icon: 'C', name: 'Letter C', type: 'LETTER' },
-            { id: 'O', icon: 'O', name: 'Letter O', type: 'LETTER' },
-            { id: 'X', icon: 'X', name: 'Letter X', type: 'LETTER' },
-            { id: '1', icon: '1', name: 'Number 1', type: 'NUMBER' },
-            { id: '3', icon: '3', name: 'Number 3', type: 'NUMBER' },
-            { id: '5', icon: '5', name: 'Number 5', type: 'NUMBER' },
-            { id: '8', icon: '8', name: 'Number 8', type: 'NUMBER' },
-            { id: 'circle', icon: '⭕', name: 'Circle', type: 'SHAPE' },
-            { id: 'square', icon: '⬜', name: 'Square', type: 'SHAPE' },
-            { id: 'triangle', icon: '🔺', name: 'Triangle', type: 'SHAPE' }
-        ];
+<script>
+// ===== CLASSES =====
+const CLS = [
+    {id:'A', icon:'A', name:'Letter A', type:'LETTER'},
+    {id:'B', icon:'B', name:'Letter B', type:'LETTER'},
+    {id:'C', icon:'C', name:'Letter C', type:'LETTER'},
+    {id:'O', icon:'O', name:'Letter O', type:'LETTER'},
+    {id:'X', icon:'X', name:'Letter X', type:'LETTER'},
+    {id:'1', icon:'1', name:'Number 1', type:'NUMBER'},
+    {id:'3', icon:'3', name:'Number 3', type:'NUMBER'},
+    {id:'5', icon:'5', name:'Number 5', type:'NUMBER'},
+    {id:'8', icon:'8', name:'Number 8', type:'NUMBER'},
+    {id:'○', icon:'⭕', name:'Circle', type:'SHAPE'},
+    {id:'□', icon:'⬜', name:'Square', type:'SHAPE'},
+    {id:'△', icon:'🔺', name:'Triangle', type:'SHAPE'}
+];
 
-        // ===== 8x8 TEMPLATES =====
-        const TEMPLATES = {
-            'A': `
-                00111100
-                01100110
-                11000011
-                11111111
-                11000011
-                11000011
-                11000011
-                00000000
-            `,
-            'B': `
-                11111100
-                11000110
-                11000110
-                11111100
-                11000110
-                11000110
-                11111100
-                00000000
-            `,
-            'C': `
-                01111110
-                11000011
-                11000000
-                11000000
-                11000000
-                11000011
-                01111110
-                00000000
-            `,
-            'O': `
-                01111110
-                11000011
-                11000011
-                11000011
-                11000011
-                11000011
-                01111110
-                00000000
-            `,
-            'X': `
-                11000011
-                01100110
-                00111100
-                00011000
-                00111100
-                01100110
-                11000011
-                00000000
-            `,
-            '1': `
-                00011000
-                00111000
-                00011000
-                00011000
-                00011000
-                00011000
-                01111110
-                00000000
-            `,
-            '3': `
-                11111100
-                00000110
-                00000110
-                01111100
-                00000110
-                00000110
-                11111100
-                00000000
-            `,
-            '5': `
-                11111110
-                11000000
-                11111100
-                00000110
-                00000110
-                11000110
-                01111100
-                00000000
-            `,
-            '8': `
-                01111110
-                11000011
-                11000011
-                01111110
-                11000011
-                11000011
-                01111110
-                00000000
-            `,
-            'circle': `
-                00111100
-                01100110
-                11000011
-                11000011
-                11000011
-                11000011
-                01100110
-                00111100
-            `,
-            'square': `
-                11111111
-                11000011
-                11000011
-                11000011
-                11000011
-                11000011
-                11000011
-                11111111
-            `,
-            'triangle': `
-                00011000
-                00111100
-                00100100
-                01100110
-                01000010
-                11000011
-                11111111
-                00000000
-            `
-        };
+// ===== 16x16 TEMPLATES (more detail) =====
+const TPL = {
+'A':`
+0000111111110000
+0001111111111000
+0011110000111100
+0111100000011110
+1111000000001111
+1111000000001111
+1111111111111111
+1111111111111111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+0000000000000000
+0000000000000000
+`,
+'B':`
+1111111111110000
+1111111111111000
+1111000000111100
+1111000000011110
+1111000000011110
+1111000000111100
+1111111111111000
+1111111111111000
+1111000000111100
+1111000000011110
+1111000000011110
+1111000000011110
+1111000000111100
+1111111111111000
+1111111111110000
+0000000000000000
+`,
+'C':`
+0001111111111000
+0011111111111100
+0111110000011110
+1111100000001111
+1111000000000000
+1111000000000000
+1111000000000000
+1111000000000000
+1111000000000000
+1111000000000000
+1111100000001111
+0111110000011110
+0011111111111100
+0001111111111000
+0000000000000000
+0000000000000000
+`,
+'O':`
+0001111111111000
+0011111111111100
+0111110000011110
+1111100000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111100000001111
+0111110000011110
+0011111111111100
+0001111111111000
+0000000000000000
+0000000000000000
+`,
+'X':`
+1111000000001111
+1111100000011111
+0111110000111110
+0011111001111100
+0001111111111000
+0000111111110000
+0000011111100000
+0000011111100000
+0000111111110000
+0001111111111000
+0011111001111100
+0111110000111110
+1111100000011111
+1111000000001111
+0000000000000000
+0000000000000000
+`,
+'1':`
+0000001111000000
+0000011111000000
+0000111111000000
+0001111111000000
+0011101111000000
+0000001111000000
+0000001111000000
+0000001111000000
+0000001111000000
+0000001111000000
+0000001111000000
+0000001111000000
+0001111111111000
+0001111111111000
+0000000000000000
+0000000000000000
+`,
+'3':`
+0011111111111100
+0111111111111110
+0000000000011110
+0000000000001111
+0000000000011110
+0000000001111100
+0001111111111000
+0001111111111000
+0000000001111100
+0000000000011110
+0000000000001111
+0000000000011110
+0111111111111110
+0011111111111100
+0000000000000000
+0000000000000000
+`,
+'5':`
+1111111111111110
+1111111111111110
+1111000000000000
+1111000000000000
+1111000000000000
+1111111111110000
+1111111111111100
+0000000000111110
+0000000000011111
+0000000000011111
+0000000000011111
+0000000000111110
+1111111111111100
+0111111111110000
+0000000000000000
+0000000000000000
+`,
+'8':`
+0001111111111000
+0011111111111100
+0111100000011110
+0111100000011110
+0111100000011110
+0011111111111100
+0001111111111000
+0011111111111100
+0111100000011110
+1111000000001111
+1111000000001111
+0111100000011110
+0011111111111100
+0001111111111000
+0000000000000000
+0000000000000000
+`,
+'○':`
+0000011111100000
+0001111111111000
+0011110000111100
+0111100000011110
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+0111100000011110
+0011110000111100
+0001111111111000
+0000011111100000
+0000000000000000
+0000000000000000
+`,
+'□':`
+1111111111111111
+1111111111111111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111000000001111
+1111111111111111
+1111111111111111
+0000000000000000
+0000000000000000
+`,
+'△':`
+0000000110000000
+0000001111000000
+0000011111100000
+0000111001110000
+0001110000111000
+0011100000011100
+0111000000001110
+1110000000000111
+1111111111111111
+1111111111111111
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+`
+};
 
-        // Parse templates
-        const PARSED_TEMPLATES = {};
-        for (const [key, val] of Object.entries(TEMPLATES)) {
-            PARSED_TEMPLATES[key] = val.trim().split('\n').map(row => 
-                row.trim().split('').map(Number)
-            );
-        }
+// Parse templates
+const PARSED = {};
+for (const [k,v] of Object.entries(TPL)) {
+    PARSED[k] = v.trim().split('\n').map(r => r.split('').map(Number));
+}
 
-        // ===== STATE =====
-        let isRunning = false;
-        let hasDrawn = false;
-        let inputGrid = [];
-        let patternScores = {};
+// ===== STATE =====
+let running = false;
+let drawn = false;
+let grid = [];
+let scores = {};
 
-        let inputSpikes = 0;
-        let hiddenSpikes = 0;
-        let outputSpikes = 0;
+let nInput = 0, nHidden1 = 0, nHidden2 = 0, nOutput = 0;
+let outSpikes = [];
 
-        let hiddenV = [];  // Hidden neuron voltages
-        let outputV = [];  // Output neuron voltages
-        let outputSpikeCount = []; // Spikes per output neuron
+// Voltages for each layer
+let vHidden1 = [];
+let vHidden2 = [];
+let vOutput = [];
 
-        let animations = [];
-        let firingOutputs = new Set();
+// Animations
+let anims = [];
+let firing = new Set();
 
-        // ===== CANVAS SETUP =====
-        const drawCanvas = document.getElementById('drawCanvas');
-        const drawCtx = drawCanvas.getContext('2d');
-        const netCanvas = document.getElementById('networkCanvas');
-        const netCtx = netCanvas.getContext('2d');
+// ===== CANVAS =====
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const netCanvas = document.getElementById('netCanvas');
+const netCtx = netCanvas.getContext('2d');
 
-        let drawing = false;
-        let lastX, lastY;
+let isDrawing = false;
+let lx, ly;
 
-        // Resize network canvas
-        function resizeNet() {
-            netCanvas.width = netCanvas.parentElement.clientWidth - 32;
-            netCanvas.height = 250;
-        }
-        window.addEventListener('resize', resizeNet);
-        resizeNet();
+function resizeNet() {
+    netCanvas.width = netCanvas.parentElement.clientWidth - 24;
+    netCanvas.height = 220;
+}
+window.addEventListener('resize', resizeNet);
+resizeNet();
 
-        // Drawing handlers
-        drawCanvas.addEventListener('mousedown', e => {
-            drawing = true;
-            const r = drawCanvas.getBoundingClientRect();
-            lastX = (e.clientX - r.left) * (260 / r.width);
-            lastY = (e.clientY - r.top) * (260 / r.height);
-            hasDrawn = true;
-        });
+// Drawing
+canvas.onmousedown = e => {
+    isDrawing = true;
+    const r = canvas.getBoundingClientRect();
+    lx = (e.clientX - r.left) * (240 / r.width);
+    ly = (e.clientY - r.top) * (240 / r.height);
+    drawn = true;
+};
 
-        drawCanvas.addEventListener('mousemove', e => {
-            if (!drawing) return;
-            const r = drawCanvas.getBoundingClientRect();
-            const x = (e.clientX - r.left) * (260 / r.width);
-            const y = (e.clientY - r.top) * (260 / r.height);
-            
-            drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 26;
-            drawCtx.lineCap = 'round';
-            drawCtx.beginPath();
-            drawCtx.moveTo(lastX, lastY);
-            drawCtx.lineTo(x, y);
-            drawCtx.stroke();
-            
-            lastX = x;
-            lastY = y;
-        });
+canvas.onmousemove = e => {
+    if (!isDrawing) return;
+    const r = canvas.getBoundingClientRect();
+    const x = (e.clientX - r.left) * (240 / r.width);
+    const y = (e.clientY - r.top) * (240 / r.height);
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 22;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lx, ly);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    lx = x; ly = y;
+};
 
-        drawCanvas.addEventListener('mouseup', () => drawing = false);
-        drawCanvas.addEventListener('mouseleave', () => drawing = false);
+canvas.onmouseup = () => isDrawing = false;
+canvas.onmouseleave = () => isDrawing = false;
 
-        // Touch support
-        drawCanvas.addEventListener('touchstart', e => {
-            e.preventDefault();
-            drawing = true;
-            const t = e.touches[0];
-            const r = drawCanvas.getBoundingClientRect();
-            lastX = (t.clientX - r.left) * (260 / r.width);
-            lastY = (t.clientY - r.top) * (260 / r.height);
-            hasDrawn = true;
-        });
+canvas.ontouchstart = e => {
+    e.preventDefault();
+    isDrawing = true;
+    const t = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    lx = (t.clientX - r.left) * (240 / r.width);
+    ly = (t.clientY - r.top) * (240 / r.height);
+    drawn = true;
+};
 
-        drawCanvas.addEventListener('touchmove', e => {
-            e.preventDefault();
-            if (!drawing) return;
-            const t = e.touches[0];
-            const r = drawCanvas.getBoundingClientRect();
-            const x = (t.clientX - r.left) * (260 / r.width);
-            const y = (t.clientY - r.top) * (260 / r.height);
-            
-            drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 26;
-            drawCtx.lineCap = 'round';
-            drawCtx.beginPath();
-            drawCtx.moveTo(lastX, lastY);
-            drawCtx.lineTo(x, y);
-            drawCtx.stroke();
-            
-            lastX = x;
-            lastY = y;
-        });
+canvas.ontouchmove = e => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const t = e.touches[0];
+    const r = canvas.getBoundingClientRect();
+    const x = (t.clientX - r.left) * (240 / r.width);
+    const y = (t.clientY - r.top) * (240 / r.height);
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 22;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lx, ly);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    lx = x; ly = y;
+};
 
-        drawCanvas.addEventListener('touchend', () => drawing = false);
+canvas.ontouchend = () => isDrawing = false;
 
-        function clearCanvas() {
-            drawCtx.fillStyle = '#000';
-            drawCtx.fillRect(0, 0, 260, 260);
-            hasDrawn = false;
-        }
-        clearCanvas();
+function clear_() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 240, 240);
+    drawn = false;
+}
+clear_();
 
-        // ===== DRAW EXAMPLES =====
-        function drawChar(id) {
-            clearCanvas();
-            hasDrawn = true;
-            
-            drawCtx.strokeStyle = '#00d4ff';
-            drawCtx.lineWidth = 26;
-            drawCtx.lineCap = 'round';
-            drawCtx.lineJoin = 'round';
-            
-            const cx = 130, cy = 130, s = 75;
-            
-            drawCtx.beginPath();
-            
-            switch(id) {
-                case 'A':
-                    drawCtx.moveTo(cx - s*0.6, cy + s);
-                    drawCtx.lineTo(cx, cy - s);
-                    drawCtx.lineTo(cx + s*0.6, cy + s);
-                    drawCtx.moveTo(cx - s*0.35, cy + s*0.2);
-                    drawCtx.lineTo(cx + s*0.35, cy + s*0.2);
-                    break;
-                case 'B':
-                    drawCtx.moveTo(cx - s*0.4, cy + s);
-                    drawCtx.lineTo(cx - s*0.4, cy - s);
-                    drawCtx.lineTo(cx + s*0.1, cy - s);
-                    drawCtx.quadraticCurveTo(cx + s*0.6, cy - s*0.5, cx + s*0.1, cy);
-                    drawCtx.quadraticCurveTo(cx + s*0.7, cy + s*0.5, cx + s*0.1, cy + s);
-                    drawCtx.lineTo(cx - s*0.4, cy + s);
-                    break;
-                case 'C':
-                    drawCtx.arc(cx, cy, s*0.8, -0.7, 0.7, true);
-                    break;
-                case 'O':
-                    drawCtx.arc(cx, cy, s*0.8, 0, Math.PI * 2);
-                    break;
-                case 'X':
-                    drawCtx.moveTo(cx - s*0.6, cy - s);
-                    drawCtx.lineTo(cx + s*0.6, cy + s);
-                    drawCtx.moveTo(cx + s*0.6, cy - s);
-                    drawCtx.lineTo(cx - s*0.6, cy + s);
-                    break;
-                case '1':
-                    drawCtx.moveTo(cx - s*0.2, cy - s*0.6);
-                    drawCtx.lineTo(cx, cy - s);
-                    drawCtx.lineTo(cx, cy + s);
-                    drawCtx.moveTo(cx - s*0.35, cy + s);
-                    drawCtx.lineTo(cx + s*0.35, cy + s);
-                    break;
-                case '3':
-                    drawCtx.moveTo(cx - s*0.4, cy - s);
-                    drawCtx.lineTo(cx + s*0.2, cy - s);
-                    drawCtx.quadraticCurveTo(cx + s*0.7, cy - s*0.5, cx + s*0.1, cy);
-                    drawCtx.quadraticCurveTo(cx + s*0.8, cy + s*0.5, cx + s*0.2, cy + s);
-                    drawCtx.lineTo(cx - s*0.4, cy + s);
-                    break;
-                case '5':
-                    drawCtx.moveTo(cx + s*0.4, cy - s);
-                    drawCtx.lineTo(cx - s*0.4, cy - s);
-                    drawCtx.lineTo(cx - s*0.4, cy - s*0.1);
-                    drawCtx.quadraticCurveTo(cx + s*0.6, cy, cx + s*0.3, cy + s*0.5);
-                    drawCtx.quadraticCurveTo(cx, cy + s*1.05, cx - s*0.35, cy + s);
-                    break;
-                case '8':
-                    drawCtx.arc(cx, cy - s*0.4, s*0.42, 0, Math.PI * 2);
-                    drawCtx.moveTo(cx + s*0.5, cy + s*0.45);
-                    drawCtx.arc(cx, cy + s*0.45, s*0.5, 0, Math.PI * 2);
-                    break;
-                case 'circle':
-                    drawCtx.arc(cx, cy, s*0.85, 0, Math.PI * 2);
-                    break;
-                case 'square':
-                    drawCtx.rect(cx - s*0.8, cy - s*0.8, s*1.6, s*1.6);
-                    break;
-                case 'triangle':
-                    drawCtx.moveTo(cx, cy - s);
-                    drawCtx.lineTo(cx + s, cy + s*0.8);
-                    drawCtx.lineTo(cx - s, cy + s*0.8);
-                    drawCtx.closePath();
-                    break;
-            }
-            
-            drawCtx.stroke();
-        }
+// ===== DRAW EXAMPLES =====
+function draw(id) {
+    clear_();
+    drawn = true;
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 22;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    const cx = 120, cy = 120, s = 70;
+    ctx.beginPath();
+    
+    switch(id) {
+        case 'A':
+            ctx.moveTo(cx-s*0.6, cy+s); ctx.lineTo(cx, cy-s); ctx.lineTo(cx+s*0.6, cy+s);
+            ctx.moveTo(cx-s*0.35, cy+s*0.15); ctx.lineTo(cx+s*0.35, cy+s*0.15);
+            break;
+        case 'B':
+            ctx.moveTo(cx-s*0.4, cy+s); ctx.lineTo(cx-s*0.4, cy-s); ctx.lineTo(cx+s*0.1, cy-s);
+            ctx.quadraticCurveTo(cx+s*0.6, cy-s*0.5, cx+s*0.1, cy);
+            ctx.quadraticCurveTo(cx+s*0.7, cy+s*0.5, cx+s*0.1, cy+s);
+            ctx.lineTo(cx-s*0.4, cy+s);
+            break;
+        case 'C':
+            ctx.arc(cx, cy, s*0.8, -0.7, 0.7, true);
+            break;
+        case 'O':
+            ctx.arc(cx, cy, s*0.8, 0, Math.PI*2);
+            break;
+        case 'X':
+            ctx.moveTo(cx-s*0.6, cy-s); ctx.lineTo(cx+s*0.6, cy+s);
+            ctx.moveTo(cx+s*0.6, cy-s); ctx.lineTo(cx-s*0.6, cy+s);
+            break;
+        case '1':
+            ctx.moveTo(cx-s*0.2, cy-s*0.6); ctx.lineTo(cx, cy-s); ctx.lineTo(cx, cy+s);
+            ctx.moveTo(cx-s*0.35, cy+s); ctx.lineTo(cx+s*0.35, cy+s);
+            break;
+        case '3':
+            ctx.moveTo(cx-s*0.4, cy-s); ctx.lineTo(cx+s*0.2, cy-s);
+            ctx.quadraticCurveTo(cx+s*0.7, cy-s*0.5, cx+s*0.1, cy);
+            ctx.quadraticCurveTo(cx+s*0.8, cy+s*0.5, cx+s*0.2, cy+s);
+            ctx.lineTo(cx-s*0.4, cy+s);
+            break;
+        case '5':
+            ctx.moveTo(cx+s*0.4, cy-s); ctx.lineTo(cx-s*0.4, cy-s);
+            ctx.lineTo(cx-s*0.4, cy-s*0.1);
+            ctx.quadraticCurveTo(cx+s*0.6, cy, cx+s*0.3, cy+s*0.5);
+            ctx.quadraticCurveTo(cx, cy+s*1.05, cx-s*0.35, cy+s);
+            break;
+        case '8':
+            ctx.arc(cx, cy-s*0.4, s*0.42, 0, Math.PI*2);
+            ctx.moveTo(cx+s*0.5, cy+s*0.45);
+            ctx.arc(cx, cy+s*0.45, s*0.5, 0, Math.PI*2);
+            break;
+        case '○':
+            ctx.arc(cx, cy, s*0.85, 0, Math.PI*2);
+            break;
+        case '□':
+            ctx.rect(cx-s*0.75, cy-s*0.75, s*1.5, s*1.5);
+            break;
+        case '△':
+            ctx.moveTo(cx, cy-s); ctx.lineTo(cx+s, cy+s*0.8); ctx.lineTo(cx-s, cy+s*0.8); ctx.closePath();
+            break;
+    }
+    ctx.stroke();
+}
 
-        // ===== EXTRACT GRID =====
-        function extractGrid() {
-            const data = drawCtx.getImageData(0, 0, 260, 260);
-            const grid = [];
-            const cell = 260 / 8;
-            
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    let sum = 0, cnt = 0;
-                    for (let dy = 0; dy < cell; dy++) {
-                        for (let dx = 0; dx < cell; dx++) {
-                            const px = Math.floor(c * cell + dx);
-                            const py = Math.floor(r * cell + dy);
-                            const i = (py * 260 + px) * 4;
-                            sum += (data.data[i] + data.data[i+1] + data.data[i+2]) / 3;
-                            cnt++;
-                        }
-                    }
-                    grid.push(sum / cnt / 255);
+// ===== EXTRACT GRID (16x16) =====
+function extractGrid() {
+    const data = ctx.getImageData(0, 0, 240, 240);
+    const g = [];
+    const cell = 15; // 240/16
+    
+    for (let r = 0; r < 16; r++) {
+        for (let c = 0; c < 16; c++) {
+            let sum = 0, cnt = 0;
+            for (let dy = 0; dy < cell; dy++) {
+                for (let dx = 0; dx < cell; dx++) {
+                    const px = Math.floor(c * cell + dx);
+                    const py = Math.floor(r * cell + dy);
+                    const i = (py * 240 + px) * 4;
+                    sum += (data.data[i] + data.data[i+1] + data.data[i+2]) / 3;
+                    cnt++;
                 }
             }
-            return grid;
+            g.push(sum / cnt / 255);
         }
+    }
+    return g;
+}
 
-        // ===== PATTERN MATCHING =====
-        function matchPattern(grid, templateId) {
-            const tmpl = PARSED_TEMPLATES[templateId];
-            if (!tmpl) return 0.1;
-            
-            let score = 0;
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const expected = tmpl[r][c];
-                    const actual = grid[r * 8 + c];
-                    
-                    if (expected === 1) {
-                        score += actual;
-                    } else {
-                        score += (1 - actual) * 0.5;
-                    }
-                }
-            }
-            return score / 64;
+// ===== PATTERN MATCHING =====
+function match(g, id) {
+    const t = PARSED[id];
+    if (!t) return 0.1;
+    
+    let score = 0;
+    for (let r = 0; r < 16; r++) {
+        for (let c = 0; c < 16; c++) {
+            const exp = t[r] ? (t[r][c] || 0) : 0;
+            const act = g[r * 16 + c];
+            if (exp === 1) score += act;
+            else score += (1 - act) * 0.5;
         }
+    }
+    return score / 256;
+}
 
-        function computeAllScores(grid) {
-            const scores = {};
-            CLASSES.forEach(cls => {
-                scores[cls.id] = matchPattern(grid, cls.id);
-            });
-            return scores;
-        }
+function calcScores(g) {
+    const s = {};
+    CLS.forEach(c => s[c.id] = match(g, c.id));
+    return s;
+}
 
-        // ===== RACE INIT =====
-        function initRace() {
-            const list = document.getElementById('raceList');
-            list.innerHTML = '';
-            outputSpikeCount = new Array(CLASSES.length).fill(0);
-            
-            CLASSES.forEach((cls, i) => {
-                const div = document.createElement('div');
-                div.className = 'race-item';
-                div.id = `race${i}`;
-                div.innerHTML = `
-                    <div class="race-rank">${i+1}</div>
-                    <div class="race-icon">${cls.icon}</div>
-                    <div class="race-info">
-                        <div class="race-name">${cls.name}</div>
-                        <div class="race-bar-bg"><div class="race-bar" id="bar${i}"></div></div>
-                    </div>
-                    <div class="race-count" id="cnt${i}">0</div>
-                `;
-                list.appendChild(div);
-            });
-        }
+// ===== RACE =====
+function initRace() {
+    const w = document.getElementById('raceWrap');
+    w.innerHTML = '';
+    outSpikes = new Array(CLS.length).fill(0);
+    
+    CLS.forEach((c, i) => {
+        const d = document.createElement('div');
+        d.className = 'race';
+        d.id = `r${i}`;
+        d.innerHTML = `
+            <div class="race-rank">${i+1}</div>
+            <div class="race-icon">${c.icon}</div>
+            <div class="race-info">
+                <div class="race-name">${c.name}</div>
+                <div class="race-bar-bg"><div class="race-bar" id="b${i}"></div></div>
+            </div>
+            <div class="race-cnt" id="c${i}">0</div>
+        `;
+        w.appendChild(d);
+    });
+}
 
-        function updateRace() {
-            const max = Math.max(1, ...outputSpikeCount);
-            let leaderId = 0, leaderVal = 0;
-            
-            outputSpikeCount.forEach((v, i) => {
-                if (v > leaderVal) {
-                    leaderVal = v;
-                    leaderId = i;
-                }
-            });
-            
-            CLASSES.forEach((cls, i) => {
-                const el = document.getElementById(`race${i}`);
-                const bar = document.getElementById(`bar${i}`);
-                const cnt = document.getElementById(`cnt${i}`);
-                
-                el.classList.remove('winner', 'firing');
-                if (i === leaderId && leaderVal > 0) el.classList.add('winner');
-                if (firingOutputs.has(i)) el.classList.add('firing');
-                
-                bar.style.width = `${(outputSpikeCount[i] / max) * 100}%`;
-                cnt.textContent = outputSpikeCount[i];
-            });
-            
-            document.getElementById('dbgLeader').textContent = `${CLASSES[leaderId].id} (${leaderVal})`;
-            firingOutputs.clear();
-        }
+function updateRace() {
+    const max = Math.max(1, ...outSpikes);
+    let leadId = 0, leadVal = 0;
+    outSpikes.forEach((v, i) => { if (v > leadVal) { leadVal = v; leadId = i; }});
+    
+    CLS.forEach((c, i) => {
+        const el = document.getElementById(`r${i}`);
+        el.classList.remove('win', 'fire');
+        if (i === leadId && leadVal > 0) el.classList.add('win');
+        if (firing.has(i)) el.classList.add('fire');
+        document.getElementById(`b${i}`).style.width = `${(outSpikes[i]/max)*100}%`;
+        document.getElementById(`c${i}`).textContent = outSpikes[i];
+    });
+    firing.clear();
+}
 
-        // ===== SPIKE BARS =====
-        function addSpike(layer, color) {
-            const track = document.getElementById(`${layer}Track`);
-            const bar = document.createElement('div');
-            bar.className = 'spike-bar';
-            bar.style.height = `${15 + Math.random() * 25}px`;
-            bar.style.background = color;
-            bar.style.boxShadow = `0 0 8px ${color}`;
-            track.appendChild(bar);
-            
-            while (track.children.length > 80) {
-                track.removeChild(track.firstChild);
-            }
-        }
+// ===== SPIKE BARS =====
+function addBar(track, color) {
+    const t = document.getElementById(track);
+    const b = document.createElement('div');
+    b.className = 'bar';
+    b.style.height = `${12 + Math.random()*25}px`;
+    b.style.background = color;
+    b.style.boxShadow = `0 0 6px ${color}`;
+    t.appendChild(b);
+    while (t.children.length > 60) t.removeChild(t.firstChild);
+}
 
-        function clearTracks() {
-            ['inputTrack', 'hiddenTrack', 'outputTrack'].forEach(id => {
-                document.getElementById(id).innerHTML = '';
-            });
-        }
+function clearTracks() {
+    ['tInput', 'tHidden1', 'tHidden2', 'tOutput'].forEach(id => {
+        document.getElementById(id).innerHTML = '';
+    });
+}
 
-        // ===== NETWORK VIS =====
-        function drawNet() {
-            const w = netCanvas.width, h = netCanvas.height;
-            netCtx.fillStyle = '#000';
-            netCtx.fillRect(0, 0, w, h);
-            
-            const layers = [
-                { x: w * 0.1, n: 8, color: '#00d4ff' },
-                { x: w * 0.5, n: 8, color: '#a855f7' },
-                { x: w * 0.9, n: 12, color: '#22c55e' }
-            ];
-            
-            // Connections
-            netCtx.strokeStyle = 'rgba(255,255,255,0.04)';
-            netCtx.lineWidth = 1;
-            for (let l = 0; l < 2; l++) {
-                const from = layers[l], to = layers[l+1];
-                for (let i = 0; i < from.n; i++) {
-                    const y1 = (i + 1) * h / (from.n + 1);
-                    for (let j = 0; j < to.n; j++) {
-                        const y2 = (j + 1) * h / (to.n + 1);
-                        netCtx.beginPath();
-                        netCtx.moveTo(from.x, y1);
-                        netCtx.lineTo(to.x, y2);
-                        netCtx.stroke();
-                    }
-                }
-            }
-            
-            // Neurons
-            layers.forEach((layer, li) => {
-                for (let i = 0; i < layer.n; i++) {
-                    const y = (i + 1) * h / (layer.n + 1);
-                    const firing = li === 2 && firingOutputs.has(i);
-                    
-                    netCtx.beginPath();
-                    netCtx.arc(layer.x, y, firing ? 14 : 10, 0, Math.PI * 2);
-                    
-                    if (firing) {
-                        netCtx.fillStyle = '#ff9500';
-                        netCtx.shadowColor = '#ff9500';
-                        netCtx.shadowBlur = 20;
-                    } else {
-                        netCtx.fillStyle = layer.color;
-                        netCtx.globalAlpha = 0.4;
-                        netCtx.shadowBlur = 0;
-                    }
-                    
-                    netCtx.fill();
-                    netCtx.globalAlpha = 1;
-                    netCtx.shadowBlur = 0;
-                    
-                    netCtx.strokeStyle = layer.color;
-                    netCtx.lineWidth = 2;
-                    netCtx.stroke();
-                }
-            });
-            
-            // Animated spikes
-            animations = animations.filter(a => {
-                a.p += 0.06;
-                if (a.p >= 1) return false;
-                
-                const from = layers[a.fl], to = layers[a.tl];
-                const y1 = (a.fn + 1) * h / (from.n + 1);
-                const y2 = (a.tn + 1) * h / (to.n + 1);
-                const x = from.x + (to.x - from.x) * a.p;
-                const y = y1 + (y2 - y1) * a.p;
-                
-                netCtx.strokeStyle = 'rgba(255,149,0,0.5)';
-                netCtx.lineWidth = 2;
+// ===== NETWORK VIS =====
+function drawNet() {
+    const w = netCanvas.width, h = netCanvas.height;
+    netCtx.fillStyle = '#000';
+    netCtx.fillRect(0, 0, w, h);
+    
+    const layers = [
+        {x: w*0.08, n: 16, col: '#00e5ff'},
+        {x: w*0.36, n: 12, col: '#aa55ff'},
+        {x: w*0.64, n: 8, col: '#aa55ff'},
+        {x: w*0.92, n: 12, col: '#00ff6a'}
+    ];
+    
+    // Connections
+    netCtx.strokeStyle = 'rgba(255,255,255,0.03)';
+    netCtx.lineWidth = 1;
+    for (let l = 0; l < 3; l++) {
+        const from = layers[l], to = layers[l+1];
+        for (let i = 0; i < from.n; i++) {
+            const y1 = (i+1) * h / (from.n+1);
+            for (let j = 0; j < to.n; j++) {
+                const y2 = (j+1) * h / (to.n+1);
                 netCtx.beginPath();
                 netCtx.moveTo(from.x, y1);
                 netCtx.lineTo(to.x, y2);
                 netCtx.stroke();
-                
-                netCtx.fillStyle = '#ff9500';
-                netCtx.shadowColor = '#ff9500';
-                netCtx.shadowBlur = 12;
-                netCtx.beginPath();
-                netCtx.arc(x, y, 7, 0, Math.PI * 2);
-                netCtx.fill();
+            }
+        }
+    }
+    
+    // Neurons
+    layers.forEach((layer, li) => {
+        for (let i = 0; i < layer.n; i++) {
+            const y = (i+1) * h / (layer.n+1);
+            const isFire = li === 3 && firing.has(i);
+            
+            netCtx.beginPath();
+            netCtx.arc(layer.x, y, isFire ? 10 : 7, 0, Math.PI*2);
+            
+            if (isFire) {
+                netCtx.fillStyle = '#ff8800';
+                netCtx.shadowColor = '#ff8800';
+                netCtx.shadowBlur = 15;
+            } else {
+                netCtx.fillStyle = layer.col;
+                netCtx.globalAlpha = 0.4;
                 netCtx.shadowBlur = 0;
-                
-                return true;
-            });
+            }
+            
+            netCtx.fill();
+            netCtx.globalAlpha = 1;
+            netCtx.shadowBlur = 0;
+            netCtx.strokeStyle = layer.col;
+            netCtx.lineWidth = 1.5;
+            netCtx.stroke();
         }
+    });
+    
+    // Animated spikes
+    anims = anims.filter(a => {
+        a.p += 0.08;
+        if (a.p >= 1) return false;
+        
+        const from = layers[a.fl], to = layers[a.tl];
+        const y1 = (a.fn+1) * h / (from.n+1);
+        const y2 = (a.tn+1) * h / (to.n+1);
+        const x = from.x + (to.x - from.x) * a.p;
+        const y = y1 + (y2 - y1) * a.p;
+        
+        netCtx.strokeStyle = 'rgba(255,136,0,0.4)';
+        netCtx.lineWidth = 2;
+        netCtx.beginPath();
+        netCtx.moveTo(from.x, y1);
+        netCtx.lineTo(to.x, y2);
+        netCtx.stroke();
+        
+        netCtx.fillStyle = '#ff8800';
+        netCtx.shadowColor = '#ff8800';
+        netCtx.shadowBlur = 10;
+        netCtx.beginPath();
+        netCtx.arc(x, y, 5, 0, Math.PI*2);
+        netCtx.fill();
+        netCtx.shadowBlur = 0;
+        
+        return true;
+    });
+}
 
-        // ===== MAIN SIMULATION =====
-        async function runProcess() {
-            if (isRunning) return;
-            if (!hasDrawn) {
-                alert('Please draw something first!');
-                return;
-            }
+// ===== MAIN SIMULATION =====
+async function run() {
+    if (running) return;
+    if (!drawn) { alert('Draw something first!'); return; }
+    
+    running = true;
+    document.getElementById('goBtn').disabled = true;
+    
+    // Reset
+    nInput = 0; nHidden1 = 0; nHidden2 = 0; nOutput = 0;
+    anims = [];
+    firing = new Set();
+    clearTracks();
+    initRace();
+    
+    document.getElementById('resWait').style.display = 'block';
+    document.getElementById('resContent').classList.remove('show');
+    document.getElementById('prog').style.width = '0%';
+    
+    // Extract & match
+    grid = extractGrid();
+    scores = calcScores(grid);
+    
+    // Initialize voltages - MORE NEURONS
+    vHidden1 = new Array(128).fill(0);
+    vHidden2 = new Array(64).fill(0);
+    vOutput = new Array(CLS.length).fill(0);
+    
+    const STEPS = 100;
+    
+    for (let t = 0; t < STEPS; t++) {
+        firing.clear();
+        
+        // ========== INPUT LAYER (256 neurons) ==========
+        // Generate LOTS of input spikes
+        for (let i = 0; i < 256; i++) {
+            const gi = Math.floor(i / 1); // map to grid (256 neurons, 256 grid cells)
+            const val = grid[gi] !== undefined ? grid[gi] : 0;
             
-            isRunning = true;
-            document.getElementById('btnProcess').disabled = true;
+            // HIGH probability for active pixels
+            const prob = val * 0.9 + 0.05; // minimum 5% random firing
             
-            // Reset
-            inputSpikes = 0;
-            hiddenSpikes = 0;
-            outputSpikes = 0;
-            animations = [];
-            firingOutputs = new Set();
-            clearTracks();
-            initRace();
-            
-            document.getElementById('resultWaiting').style.display = 'block';
-            document.getElementById('resultContent').classList.remove('show');
-            document.getElementById('progressBar').style.width = '0%';
-            
-            // Extract input
-            inputGrid = extractGrid();
-            
-            // Compute pattern scores
-            patternScores = computeAllScores(inputGrid);
-            
-            // Find best match for debug
-            let bestId = '', bestScore = 0;
-            for (const [id, score] of Object.entries(patternScores)) {
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestId = id;
-                }
-            }
-            document.getElementById('dbgMatch').textContent = `${bestId} (${(bestScore*100).toFixed(1)}%)`;
-            
-            // Initialize neuron voltages
-            hiddenV = new Array(32).fill(0);
-            outputV = new Array(CLASSES.length).fill(0);
-            
-            // ===== RUN SIMULATION =====
-            const STEPS = 80;
-            
-            for (let t = 0; t < STEPS; t++) {
-                firingOutputs.clear();
+            if (Math.random() < prob) {
+                nInput++;
+                addBar('tInput', '#00e5ff');
                 
-                // --- INPUT LAYER ---
-                let inputFired = 0;
-                for (let i = 0; i < 64; i++) {
-                    const val = inputGrid[i];
-                    
-                    // Higher probability of spiking for brighter pixels
-                    if (Math.random() < val * 0.8) {
-                        inputSpikes++;
-                        inputFired++;
-                        addSpike('input', '#00d4ff');
-                        
-                        // DIRECTLY ADD VOLTAGE TO HIDDEN NEURONS
-                        // Each input spike affects multiple hidden neurons
-                        for (let h = 0; h < 32; h++) {
-                            // Random connectivity with ~50% probability
-                            if (Math.random() < 0.5) {
-                                hiddenV[h] += val * 0.3;
-                            }
-                        }
-                        
-                        // Animation
-                        if (Math.random() < 0.05) {
-                            animations.push({
-                                fl: 0, tl: 1,
-                                fn: Math.floor(i / 8),
-                                tn: Math.floor(Math.random() * 8),
-                                p: 0
-                            });
-                        }
+                // STRONG feed to Hidden Layer 1
+                // Each input connects to ~30% of hidden1
+                for (let h = 0; h < 128; h++) {
+                    if (Math.random() < 0.3) {
+                        vHidden1[h] += val * 0.4 + 0.1;
                     }
                 }
                 
-                // --- HIDDEN LAYER ---
-                let hiddenFired = 0;
-                for (let h = 0; h < 32; h++) {
-                    // Leak
-                    hiddenV[h] *= 0.8;
-                    
-                    // Fire if above threshold
-                    if (hiddenV[h] > 1.0) {
-                        hiddenV[h] = 0;
-                        hiddenSpikes++;
-                        hiddenFired++;
-                        addSpike('hidden', '#a855f7');
-                        
-                        // FEED INTO OUTPUT NEURONS - WEIGHTED BY PATTERN MATCH
-                        CLASSES.forEach((cls, o) => {
-                            const weight = patternScores[cls.id];
-                            
-                            // Better pattern match = more voltage added
-                            // Probability of connection also depends on weight
-                            const prob = 0.4 + weight * 0.5;
-                            const strength = 0.3 + weight * 0.5;
-                            
-                            if (Math.random() < prob) {
-                                outputV[o] += strength;
-                            }
-                        });
-                        
-                        // Animation
-                        if (Math.random() < 0.1) {
-                            const targetOut = Math.floor(Math.random() * 12);
-                            animations.push({
-                                fl: 1, tl: 2,
-                                fn: Math.floor(h / 4),
-                                tn: targetOut,
-                                p: 0
-                            });
-                        }
-                    }
+                // Animate some
+                if (Math.random() < 0.02) {
+                    anims.push({fl:0, tl:1, fn:Math.floor(i/16), tn:Math.floor(Math.random()*12), p:0});
                 }
-                
-                // --- OUTPUT LAYER ---
-                for (let o = 0; o < CLASSES.length; o++) {
-                    // Add continuous bias from pattern match
-                    outputV[o] += patternScores[CLASSES[o].id] * 0.15;
-                    
-                    // Leak
-                    outputV[o] *= 0.75;
-                    
-                    // Fire if above threshold (LOW THRESHOLD!)
-                    if (outputV[o] > 0.6) {
-                        outputV[o] = 0;
-                        outputSpikes++;
-                        outputSpikeCount[o]++;
-                        addSpike('output', '#22c55e');
-                        firingOutputs.add(o);
-                    }
-                }
-                
-                // Update displays
-                document.getElementById('dbgTime').textContent = t;
-                document.getElementById('dbgInput').textContent = inputSpikes;
-                document.getElementById('dbgHidden').textContent = hiddenSpikes;
-                document.getElementById('dbgOutput').textContent = outputSpikes;
-                
-                document.getElementById('inputCount').textContent = inputSpikes;
-                document.getElementById('hiddenCount').textContent = hiddenSpikes;
-                document.getElementById('outputCount').textContent = outputSpikes;
-                
-                document.getElementById('progressBar').style.width = `${(t / STEPS) * 100}%`;
-                
-                updateRace();
-                drawNet();
-                
-                await sleep(18);
             }
-            
-            // Show result
-            showResult();
-            
-            isRunning = false;
-            document.getElementById('btnProcess').disabled = false;
-            document.getElementById('progressBar').style.width = '100%';
         }
-
-        function showResult() {
-            let winnerId = 0, winnerVal = 0, secondVal = 0;
+        
+        // ========== HIDDEN LAYER 1 (128 neurons) ==========
+        for (let h = 0; h < 128; h++) {
+            vHidden1[h] *= 0.7; // leak
             
-            outputSpikeCount.forEach((v, i) => {
-                if (v > winnerVal) {
-                    secondVal = winnerVal;
-                    winnerVal = v;
-                    winnerId = i;
-                } else if (v > secondVal) {
-                    secondVal = v;
+            // Fire if above LOW threshold
+            if (vHidden1[h] > 0.8) {
+                vHidden1[h] = 0;
+                nHidden1++;
+                addBar('tHidden1', '#aa55ff');
+                
+                // Feed to Hidden Layer 2 - strong connections
+                for (let h2 = 0; h2 < 64; h2++) {
+                    if (Math.random() < 0.4) {
+                        vHidden2[h2] += 0.5;
+                    }
                 }
-            });
-            
-            const winner = CLASSES[winnerId];
-            const totalOut = outputSpikeCount.reduce((a, b) => a + b, 0);
-            const conf = totalOut > 0 ? Math.round((winnerVal / totalOut) * 100) : 0;
-            const margin = winnerVal - secondVal;
-            
-            document.getElementById('resultWaiting').style.display = 'none';
-            document.getElementById('resultContent').classList.add('show');
-            
-            document.getElementById('resIcon').textContent = winner.icon;
-            document.getElementById('resName').textContent = winner.name;
-            document.getElementById('resType').textContent = winner.type;
-            document.getElementById('resWinner').textContent = winnerVal;
-            document.getElementById('resTotal').textContent = totalOut;
-            document.getElementById('resConf').textContent = conf + '%';
-            document.getElementById('resMargin').textContent = '+' + margin;
-            
-            const patScore = patternScores[winner.id];
-            document.getElementById('resExplain').innerHTML = `
-                <strong>"${winner.name}"</strong> won with <strong>${winnerVal} output spikes</strong>!<br><br>
-                • Pattern match: <strong>${(patScore * 100).toFixed(1)}%</strong><br>
-                • Beat 2nd place by: <strong>+${margin}</strong> spikes<br>
-                • Total output spikes: <strong>${totalOut}</strong><br><br>
-                The better your drawing matches the pattern, the more spikes flow to that output neuron. <strong>Most spikes = winner!</strong>
-            `;
+                
+                // Animate
+                if (Math.random() < 0.05) {
+                    anims.push({fl:1, tl:2, fn:Math.floor(h/11), tn:Math.floor(Math.random()*8), p:0});
+                }
+            }
         }
-
-        function sleep(ms) {
-            return new Promise(r => setTimeout(r, ms));
+        
+        // ========== HIDDEN LAYER 2 (64 neurons) ==========
+        for (let h = 0; h < 64; h++) {
+            vHidden2[h] *= 0.7; // leak
+            
+            if (vHidden2[h] > 0.7) {
+                vHidden2[h] = 0;
+                nHidden2++;
+                addBar('tHidden2', '#aa55ff');
+                
+                // Feed to Output - WEIGHTED BY PATTERN SCORE
+                CLS.forEach((c, o) => {
+                    const w = scores[c.id] || 0.1;
+                    const prob = 0.3 + w * 0.6; // 30-90% connection prob
+                    const str = 0.4 + w * 0.8;  // 0.4-1.2 strength
+                    
+                    if (Math.random() < prob) {
+                        vOutput[o] += str;
+                    }
+                });
+                
+                // Animate
+                if (Math.random() < 0.08) {
+                    const tgt = Math.floor(Math.random() * 12);
+                    anims.push({fl:2, tl:3, fn:Math.floor(h/8), tn:tgt, p:0});
+                }
+            }
         }
-
-        // ===== INIT =====
-        initRace();
+        
+        // ========== OUTPUT LAYER (12 neurons) ==========
+        for (let o = 0; o < CLS.length; o++) {
+            // Continuous pattern bias
+            vOutput[o] += (scores[CLS[o].id] || 0) * 0.25;
+            
+            vOutput[o] *= 0.65; // leak
+            
+            // Fire if above threshold
+            if (vOutput[o] > 0.5) {
+                vOutput[o] = 0;
+                nOutput++;
+                outSpikes[o]++;
+                addBar('tOutput', '#00ff6a');
+                firing.add(o);
+            }
+        }
+        
+        // Update displays
+        document.getElementById('sTotal').textContent = nInput + nHidden1 + nHidden2 + nOutput;
+        document.getElementById('sInput').textContent = nInput;
+        document.getElementById('sHidden').textContent = nHidden1 + nHidden2;
+        document.getElementById('sOutput').textContent = nOutput;
+        
+        document.getElementById('cInput').textContent = nInput;
+        document.getElementById('cHidden1').textContent = nHidden1;
+        document.getElementById('cHidden2').textContent = nHidden2;
+        document.getElementById('cOutput').textContent = nOutput;
+        
+        document.getElementById('prog').style.width = `${(t/STEPS)*100}%`;
+        
+        updateRace();
         drawNet();
-    </script>
+        
+        await new Promise(r => setTimeout(r, 15));
+    }
+    
+    // Show result
+    showResult();
+    
+    running = false;
+    document.getElementById('goBtn').disabled = false;
+    document.getElementById('prog').style.width = '100%';
+}
+
+function showResult() {
+    let winId = 0, winVal = 0, secVal = 0;
+    outSpikes.forEach((v, i) => {
+        if (v > winVal) { secVal = winVal; winVal = v; winId = i; }
+        else if (v > secVal) secVal = v;
+    });
+    
+    const win = CLS[winId];
+    const totOut = outSpikes.reduce((a,b) => a+b, 0);
+    const conf = totOut > 0 ? Math.round((winVal/totOut)*100) : 0;
+    const marg = winVal - secVal;
+    
+    document.getElementById('resWait').style.display = 'none';
+    document.getElementById('resContent').classList.add('show');
+    
+    document.getElementById('rIcon').textContent = win.icon;
+    document.getElementById('rName').textContent = win.name;
+    document.getElementById('rType').textContent = win.type;
+    document.getElementById('rWin').textContent = winVal;
+    document.getElementById('rTot').textContent = totOut;
+    document.getElementById('rConf').textContent = conf + '%';
+    document.getElementById('rMarg').textContent = '+' + marg;
+    
+    const ps = scores[win.id] || 0;
+    document.getElementById('rExplain').innerHTML = `
+        <strong>"${win.name}"</strong> won with <strong>${winVal}</strong> output spikes!<br><br>
+        • Pattern similarity: <strong>${(ps*100).toFixed(1)}%</strong><br>
+        • Lead over 2nd: <strong>+${marg}</strong> spikes<br>
+        • Total network spikes: <strong>${nInput + nHidden1 + nHidden2 + nOutput}</strong><br><br>
+        <strong>256 input → 128 hidden1 → 64 hidden2 → 12 output neurons</strong><br>
+        The matched pattern received stronger weighted connections, causing more output spikes!
+    `;
+}
+
+// ===== INIT =====
+initRace();
+drawNet();
+</script>
 </body>
 </html>
