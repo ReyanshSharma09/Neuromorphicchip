@@ -3,106 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧠 SNN with Learning</title>
+    <title>🧠 SNN with Memory</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Segoe UI',sans-serif;background:#0a0a1a;color:#fff;min-height:100vh;padding:10px}
+        body{font-family:'Segoe UI',sans-serif;background:#0a0a1a;color:#fff;min-height:100vh;padding:8px}
         
-        .header{text-align:center;padding:8px}
-        .header h1{font-size:1.3rem;color:#00f5a0}
-        .header p{font-size:0.7rem;color:#666}
+        .header{text-align:center;padding:6px}
+        .header h1{font-size:1.2rem;color:#00f5a0}
+        .header p{font-size:0.65rem;color:#666}
         
-        .main{display:grid;grid-template-columns:220px 1fr 240px;gap:10px;max-width:1250px;margin:0 auto}
+        .main{display:grid;grid-template-columns:200px 1fr 220px;gap:8px;max-width:1200px;margin:0 auto}
         
-        .panel{background:rgba(255,255,255,0.03);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,0.08)}
-        .panel h3{color:#00f5a0;font-size:0.8rem;margin-bottom:6px;border-bottom:1px solid rgba(0,245,160,0.2);padding-bottom:4px}
+        .panel{background:rgba(255,255,255,0.03);border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,0.08)}
+        .panel h3{color:#00f5a0;font-size:0.75rem;margin-bottom:5px;border-bottom:1px solid rgba(0,245,160,0.2);padding-bottom:3px}
         
-        .input-display{font-size:4rem;text-align:center;color:#00f5a0;padding:15px;background:#0d0d1a;border-radius:10px;margin-bottom:8px;font-weight:bold}
+        .input-display{font-size:3.5rem;text-align:center;color:#00f5a0;padding:12px;background:#0d0d1a;border-radius:8px;margin-bottom:6px;font-weight:bold}
         
-        .digit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
-        .digit-btn{padding:12px;font-size:1.3rem;background:#1a1a2e;border:2px solid #333;border-radius:6px;color:#fff;cursor:pointer;font-weight:bold}
+        .digit-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:6px}
+        .digit-btn{padding:10px;font-size:1.1rem;background:#1a1a2e;border:2px solid #333;border-radius:5px;color:#fff;cursor:pointer;font-weight:bold;position:relative}
         .digit-btn:hover,.digit-btn.active{border-color:#00f5a0;background:#00f5a0;color:#000}
+        .digit-btn .mem-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#333}
+        .digit-btn .mem-dot.learned{background:#00f5a0;box-shadow:0 0 5px #00f5a0}
+        .digit-btn .mem-dot.partial{background:#ffd700}
         
-        .btn{width:100%;padding:12px;border:none;border-radius:8px;font-size:0.95rem;font-weight:bold;cursor:pointer;margin-bottom:6px}
+        .btn{width:100%;padding:10px;border:none;border-radius:6px;font-size:0.85rem;font-weight:bold;cursor:pointer;margin-bottom:5px}
         .btn-go{background:linear-gradient(135deg,#00f5a0,#00d9f5);color:#000}
         .btn-go:disabled{opacity:0.5}
-        .btn-train{background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff}
-        .btn-small{padding:8px;font-size:0.8rem;background:#333;color:#aaa}
+        .btn-small{padding:7px;font-size:0.75rem;background:#333;color:#aaa}
+        .btn-memory{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+        .btn-danger{background:#dc3545;color:#fff}
         
-        .pixel-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:6px;background:#000;border-radius:6px;margin-bottom:8px}
+        .pixel-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:5px;background:#000;border-radius:5px;margin-bottom:6px}
         .pixel{aspect-ratio:1;background:#111;border-radius:2px}
-        .pixel.on{background:#00f5a0;box-shadow:0 0 8px #00f5a0}
-        .pixel.spike{background:#fff;transform:scale(1.3);box-shadow:0 0 15px #fff}
+        .pixel.on{background:#00f5a0;box-shadow:0 0 6px #00f5a0}
+        .pixel.spike{background:#fff;transform:scale(1.3)}
         
-        .counters{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
-        .counter{text-align:center;padding:8px;background:#0d0d1a;border-radius:6px;border:2px solid #333}
+        .counters{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
+        .counter{text-align:center;padding:6px;background:#0d0d1a;border-radius:5px;border:2px solid #333}
         .counter.c-in{border-color:#00f5a0}
         .counter.c-hid{border-color:#ffd700}
         .counter.c-out{border-color:#f093fb}
-        .counter .val{font-size:1.6rem;font-weight:bold}
+        .counter .val{font-size:1.4rem;font-weight:bold}
         .counter.c-in .val{color:#00f5a0}
         .counter.c-hid .val{color:#ffd700}
         .counter.c-out .val{color:#f093fb}
-        .counter .lbl{font-size:0.6rem;color:#666}
+        .counter .lbl{font-size:0.55rem;color:#666}
         
-        .status{text-align:center;padding:8px;background:#0d0d1a;border-radius:6px;margin-bottom:6px;font-size:0.8rem;color:#00f5a0}
-        .progress{height:6px;background:#1a1a2e;border-radius:3px;margin-bottom:6px;overflow:hidden}
+        .status{text-align:center;padding:6px;background:#0d0d1a;border-radius:5px;margin-bottom:5px;font-size:0.75rem;color:#00f5a0}
+        .progress{height:5px;background:#1a1a2e;border-radius:3px;margin-bottom:5px;overflow:hidden}
         .progress-fill{height:100%;background:linear-gradient(90deg,#00f5a0,#00d9f5);width:0%}
         
-        .network-canvas{width:100%;height:220px;background:#050510;border-radius:8px;margin-bottom:8px}
+        .network-canvas{width:100%;height:180px;background:#050510;border-radius:6px;margin-bottom:6px}
         
-        .membrane-display{background:#000;border-radius:6px;padding:6px;margin-bottom:8px}
-        .membrane-row{display:flex;align-items:center;margin-bottom:3px;font-size:0.65rem}
-        .membrane-row .lbl{width:20px;color:#888}
-        .membrane-row .bar{flex:1;height:10px;background:#1a1a2e;border-radius:3px;overflow:hidden;margin:0 4px}
+        .membrane-display{background:#000;border-radius:5px;padding:5px;margin-bottom:6px}
+        .membrane-row{display:flex;align-items:center;margin-bottom:2px;font-size:0.6rem}
+        .membrane-row .lbl{width:18px;color:#888}
+        .membrane-row .bar{flex:1;height:8px;background:#1a1a2e;border-radius:3px;overflow:hidden;margin:0 3px}
         .membrane-row .fill{height:100%;border-radius:3px}
-        .membrane-row .val{width:30px;text-align:right;font-family:monospace;font-size:0.6rem}
+        .membrane-row .val{width:28px;text-align:right;font-family:monospace;font-size:0.55rem}
         
-        .raster{height:70px;background:#000;border-radius:6px;position:relative;overflow:hidden;margin-bottom:8px}
-        .raster-dot{position:absolute;width:3px;height:3px;border-radius:50%}
+        .raster{height:60px;background:#000;border-radius:5px;position:relative;overflow:hidden;margin-bottom:6px}
+        .raster-dot{position:absolute;width:2px;height:2px;border-radius:50%}
+        
+        /* Memory Panel */
+        .memory-panel{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));border:2px solid rgba(102,126,234,0.3);border-radius:8px;padding:8px;margin-bottom:6px}
+        .memory-panel h4{color:#667eea;font-size:0.8rem;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+        .memory-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-bottom:8px}
+        .memory-cell{aspect-ratio:1;background:#1a1a2e;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:bold;color:#555;border:2px solid transparent;position:relative}
+        .memory-cell.memorized{background:rgba(0,245,160,0.2);border-color:#00f5a0;color:#00f5a0}
+        .memory-cell.partial{background:rgba(255,215,0,0.2);border-color:#ffd700;color:#ffd700}
+        .memory-cell .strength{position:absolute;bottom:0;left:0;right:0;height:3px;background:#333;border-radius:0 0 2px 2px}
+        .memory-cell .strength-fill{height:100%;background:#00f5a0;border-radius:0 0 2px 2px}
+        .memory-info{font-size:0.65rem;color:#aaa;margin-bottom:5px}
+        .memory-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:0.65rem}
+        .memory-stat{background:rgba(0,0,0,0.3);padding:5px;border-radius:4px;text-align:center}
+        .memory-stat .v{font-size:1rem;font-weight:bold;color:#667eea}
+        .memory-stat .k{color:#888}
         
         /* Learning Panel */
-        .learn-panel{background:linear-gradient(135deg,rgba(240,147,251,0.1),rgba(245,87,108,0.1));border:2px solid rgba(240,147,251,0.3);border-radius:10px;padding:10px;margin-bottom:8px}
-        .learn-panel h4{color:#f093fb;font-size:0.85rem;margin-bottom:8px}
-        .learn-info{font-size:0.75rem;color:#aaa;margin-bottom:8px;line-height:1.4}
-        .learn-status{padding:8px;background:rgba(0,0,0,0.3);border-radius:6px;font-size:0.75rem;margin-bottom:8px}
-        .learn-status.learning{border-left:3px solid #ffd700;color:#ffd700}
-        .learn-status.success{border-left:3px solid #00f5a0;color:#00f5a0}
-        .learn-status.error{border-left:3px solid #f5576c;color:#f5576c}
+        .learn-panel{background:linear-gradient(135deg,rgba(240,147,251,0.1),rgba(245,87,108,0.1));border:2px solid rgba(240,147,251,0.3);border-radius:8px;padding:8px;margin-bottom:6px}
+        .learn-panel h4{color:#f093fb;font-size:0.75rem;margin-bottom:5px}
+        .learn-status{padding:6px;background:rgba(0,0,0,0.3);border-radius:5px;font-size:0.7rem;margin-bottom:5px;border-left:3px solid #555}
+        .learn-status.learning{border-color:#ffd700;color:#ffd700}
+        .learn-status.success{border-color:#00f5a0;color:#00f5a0}
+        .learn-status.error{border-color:#f5576c;color:#f5576c}
+        .learn-status.consolidating{border-color:#667eea;color:#667eea}
         
-        .weight-change{font-size:0.7rem;padding:4px 8px;background:#111;border-radius:4px;margin:2px 0;font-family:monospace}
-        .weight-change.up{color:#00f5a0}
-        .weight-change.down{color:#f5576c}
+        .weight-changes{max-height:60px;overflow-y:auto;font-size:0.6rem}
+        .weight-changes::-webkit-scrollbar{width:3px}
+        .weight-changes::-webkit-scrollbar-thumb{background:#333}
+        .wc{padding:2px 5px;background:#111;border-radius:3px;margin:2px 0;font-family:monospace}
+        .wc.up{color:#00f5a0}
+        .wc.down{color:#f5576c}
+        .wc.protect{color:#667eea}
         
         /* Result */
-        .result{text-align:center;padding:15px;background:linear-gradient(135deg,rgba(0,245,160,0.1),rgba(0,217,245,0.1));border:3px solid #00f5a0;border-radius:12px;margin-bottom:8px}
-        .result-digit{font-size:4rem;font-weight:900;color:#00f5a0;line-height:1}
-        .result-info{font-size:0.85rem;color:#888;margin-top:3px}
+        .result{text-align:center;padding:12px;background:linear-gradient(135deg,rgba(0,245,160,0.1),rgba(0,217,245,0.1));border:3px solid #00f5a0;border-radius:10px;margin-bottom:6px}
+        .result-digit{font-size:3.5rem;font-weight:900;color:#00f5a0;line-height:1}
+        .result-info{font-size:0.8rem;color:#888;margin-top:3px}
         .result.correct{border-color:#00f5a0}.result.correct .result-info{color:#00f5a0}
         .result.wrong{border-color:#ff5555}.result.wrong .result-digit,.result.wrong .result-info{color:#ff5555}
         
-        .output-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
-        .out-cell{text-align:center;padding:6px 3px;background:#1a1a2e;border-radius:6px;border:2px solid #333}
-        .out-cell .d{font-size:1.1rem;font-weight:bold;color:#666}
-        .out-cell .s{font-size:0.65rem;color:#555}
+        .output-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:6px}
+        .out-cell{text-align:center;padding:5px 2px;background:#1a1a2e;border-radius:5px;border:2px solid #333}
+        .out-cell .d{font-size:1rem;font-weight:bold;color:#666}
+        .out-cell .s{font-size:0.6rem;color:#555}
         .out-cell.active{border-color:#f093fb;background:rgba(240,147,251,0.15)}
         .out-cell.active .d{color:#f093fb}
-        .out-cell.winner{border-color:#00f5a0;background:rgba(0,245,160,0.2);transform:scale(1.05)}
+        .out-cell.winner{border-color:#00f5a0;background:rgba(0,245,160,0.2)}
         .out-cell.winner .d{color:#00f5a0}
         
-        .stat{display:flex;justify-content:space-between;padding:3px 0;font-size:0.75rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+        .stat{display:flex;justify-content:space-between;padding:2px 0;font-size:0.7rem;border-bottom:1px solid rgba(255,255,255,0.05)}
         .stat .k{color:#555}.stat .v{color:#00f5a0}
         
-        .log{height:80px;overflow-y:auto;background:#000;border-radius:4px;padding:4px;font-family:monospace;font-size:0.6rem}
-        .log::-webkit-scrollbar{width:3px}
+        .log{height:60px;overflow-y:auto;background:#000;border-radius:4px;padding:3px;font-family:monospace;font-size:0.55rem}
+        .log::-webkit-scrollbar{width:2px}
         .log::-webkit-scrollbar-thumb{background:#333}
-        .log .i{color:#00f5a0}.log .h{color:#ffd700}.log .o{color:#f093fb}.log .l{color:#ff69b4}
+        .log .i{color:#00f5a0}.log .h{color:#ffd700}.log .o{color:#f093fb}.log .l{color:#ff69b4}.log .m{color:#667eea}
         
-        /* Accuracy meter */
-        .accuracy-box{text-align:center;padding:10px;background:#0d0d1a;border-radius:8px;margin-bottom:8px}
-        .accuracy-value{font-size:2rem;font-weight:bold}
-        .accuracy-bar{height:8px;background:#1a1a2e;border-radius:4px;margin-top:5px;overflow:hidden}
-        .accuracy-fill{height:100%;background:linear-gradient(90deg,#f5576c,#ffd700,#00f5a0);border-radius:4px}
+        .accuracy-box{text-align:center;padding:8px;background:#0d0d1a;border-radius:6px;margin-bottom:6px}
+        .accuracy-value{font-size:1.6rem;font-weight:bold}
+        .accuracy-bar{height:6px;background:#1a1a2e;border-radius:3px;margin-top:4px;overflow:hidden}
+        .accuracy-fill{height:100%;background:linear-gradient(90deg,#f5576c,#ffd700,#00f5a0);border-radius:3px}
         
         @media(max-width:900px){.main{grid-template-columns:1fr}}
     </style>
@@ -110,8 +132,8 @@
 <body>
 
 <div class="header">
-    <h1>🧠 SNN with Error-Based Learning</h1>
-    <p>Network learns from mistakes and improves recognition over time</p>
+    <h1>🧠 SNN with Persistent Memory</h1>
+    <p>Network remembers what it learns • No catastrophic forgetting • Weights saved to memory</p>
 </div>
 
 <div class="main">
@@ -121,22 +143,14 @@
         
         <div class="input-display" id="inputDisplay">5</div>
         
-        <div class="digit-grid">
-            <button class="digit-btn" onclick="selectDigit(0)">0</button>
-            <button class="digit-btn" onclick="selectDigit(1)">1</button>
-            <button class="digit-btn" onclick="selectDigit(2)">2</button>
-            <button class="digit-btn" onclick="selectDigit(3)">3</button>
-            <button class="digit-btn" onclick="selectDigit(4)">4</button>
-            <button class="digit-btn active" onclick="selectDigit(5)">5</button>
-            <button class="digit-btn" onclick="selectDigit(6)">6</button>
-            <button class="digit-btn" onclick="selectDigit(7)">7</button>
-            <button class="digit-btn" onclick="selectDigit(8)">8</button>
-            <button class="digit-btn" onclick="selectDigit(9)">9</button>
-        </div>
+        <div class="digit-grid" id="digitGrid"></div>
         
         <button class="btn btn-go" id="goBtn" onclick="runSimulation()">⚡ RECOGNIZE</button>
-        <button class="btn btn-small" onclick="randomDigit()">🎲 Random</button>
-        <button class="btn btn-small" onclick="autoTrain()">🔄 Auto Train (10x)</button>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+            <button class="btn btn-small" onclick="randomDigit()">🎲 Random</button>
+            <button class="btn btn-small" onclick="autoTrain()">🔄 Train 10x</button>
+        </div>
         
         <h3>🔢 Pattern</h3>
         <div class="pixel-grid" id="pixelGrid"></div>
@@ -144,7 +158,6 @@
         <h3>📊 Stats</h3>
         <div class="stat"><span class="k">Input:</span><span class="v" id="sIn">5</span></div>
         <div class="stat"><span class="k">Active Pixels:</span><span class="v" id="sPx">0</span></div>
-        <div class="stat"><span class="k">Learn Rate:</span><span class="v" id="sLR">0.5</span></div>
     </div>
     
     <!-- NETWORK -->
@@ -171,7 +184,7 @@
         
         <canvas class="network-canvas" id="netCanvas"></canvas>
         
-        <h3>⚡ Output Membrane Potentials</h3>
+        <h3>⚡ Output Potentials</h3>
         <div class="membrane-display" id="membraneDisplay"></div>
         
         <h3>📊 Raster</h3>
@@ -181,7 +194,7 @@
         <div class="log" id="log"></div>
     </div>
     
-    <!-- OUTPUT & LEARNING -->
+    <!-- OUTPUT & MEMORY -->
     <div class="panel">
         <h3>🎯 RESULT</h3>
         
@@ -193,16 +206,33 @@
         <h3>🧠 Output Neurons</h3>
         <div class="output-grid" id="outputGrid"></div>
         
+        <!-- MEMORY PANEL -->
+        <div class="memory-panel">
+            <h4>💾 MEMORY BANK</h4>
+            <div class="memory-grid" id="memoryGrid"></div>
+            <div class="memory-info">Green = Memorized | Yellow = Partial | Gray = Not learned</div>
+            <div class="memory-stats">
+                <div class="memory-stat">
+                    <div class="v" id="memCount">0</div>
+                    <div class="k">Memorized</div>
+                </div>
+                <div class="memory-stat">
+                    <div class="v" id="memStrength">0%</div>
+                    <div class="k">Avg Strength</div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px">
+                <button class="btn btn-memory btn-small" onclick="saveMemory()">💾 Save</button>
+                <button class="btn btn-memory btn-small" onclick="loadMemory()">📂 Load</button>
+            </div>
+            <button class="btn btn-small" onclick="consolidateMemory()" style="margin-top:4px">🔒 Consolidate Memory</button>
+        </div>
+        
         <!-- LEARNING PANEL -->
         <div class="learn-panel">
             <h4>🎓 LEARNING</h4>
-            <div class="learn-info">
-                When wrong: Network analyzes error and adjusts synaptic weights to recognize the correct pattern.
-            </div>
-            <div class="learn-status" id="learnStatus">
-                Waiting for recognition...
-            </div>
-            <div id="weightChanges"></div>
+            <div class="learn-status" id="learnStatus">Waiting...</div>
+            <div class="weight-changes" id="weightChanges"></div>
         </div>
         
         <h3>📈 Accuracy</h3>
@@ -213,23 +243,10 @@
             </div>
         </div>
         
-        <div class="stat"><span class="k">Total Tests:</span><span class="v" id="sTests">0</span></div>
+        <div class="stat"><span class="k">Tests:</span><span class="v" id="sTests">0</span></div>
         <div class="stat"><span class="k">Correct:</span><span class="v" id="sCorrect">0</span></div>
-        <div class="stat"><span class="k">Learned:</span><span class="v" id="sLearned">0</span></div>
         
-        <h3 style="margin-top:8px">⚙️ Settings</h3>
-        <div class="stat">
-            <span class="k">Duration</span>
-            <input type="range" id="pDur" min="100" max="400" value="200" style="width:60px">
-            <span class="v" id="vDur">200</span>ms
-        </div>
-        <div class="stat">
-            <span class="k">Learning Rate</span>
-            <input type="range" id="pLR" min="1" max="20" value="10" style="width:60px">
-            <span class="v" id="vLR">10</span>
-        </div>
-        
-        <button class="btn btn-small" onclick="resetWeights()" style="margin-top:8px">🔄 Reset Weights</button>
+        <button class="btn btn-danger btn-small" onclick="fullReset()" style="margin-top:6px">🗑️ Full Reset</button>
     </div>
 </div>
 
@@ -254,10 +271,9 @@ const PATTERNS = {
 // NETWORK ARCHITECTURE
 // ================================================================
 const INPUT_SIZE = 49;
-const HIDDEN_SIZE = 30;  // 3 per digit
+const HIDDEN_SIZE = 30;
 const OUTPUT_SIZE = 10;
 
-// Neuron parameters
 const V_REST = -65;
 const V_THRESH = -50;
 const V_RESET = -70;
@@ -274,20 +290,21 @@ let running = false;
 let V_hid = [], I_hid = [], ref_hid = [], spkCnt_hid = [];
 let V_out = [], I_out = [], ref_out = [], spkCnt_out = [];
 
-// Weights - these will be LEARNED
-let W_ih = [];  // Input -> Hidden [HIDDEN_SIZE][INPUT_SIZE]
-let W_ho = [];  // Hidden -> Output [OUTPUT_SIZE][HIDDEN_SIZE]
+// ===== WEIGHTS WITH MEMORY =====
+let W_ih = [];  // Input -> Hidden
+let W_ho = [];  // Hidden -> Output
 
-// Spike counters
+// ===== MEMORY SYSTEM =====
+let weightImportance_ih = [];  // How important each weight is (0-1)
+let weightImportance_ho = [];
+let digitMemoryStrength = new Array(10).fill(0);  // 0-100 for each digit
+let digitLearnCount = new Array(10).fill(0);  // How many times each digit was learned
+let consolidatedWeights_ih = null;  // Snapshot of well-learned weights
+let consolidatedWeights_ho = null;
+
+// Counters
 let totalIn = 0, totalHid = 0, totalOut = 0;
-
-// Learning stats
-let tests = 0, correct = 0, learned = 0;
-
-// Last result for learning
-let lastInput = -1;
-let lastOutput = -1;
-let lastWasCorrect = false;
+let tests = 0, correct = 0;
 
 // Canvas
 let ctx = null;
@@ -296,81 +313,73 @@ let ctx = null;
 // INITIALIZE
 // ================================================================
 function init() {
-    console.log("Initializing SNN with Learning...");
+    console.log("Initializing SNN with Memory System...");
     
-    initializeWeights();
+    // Try to load saved memory first
+    if (!loadMemoryFromStorage()) {
+        initializeWeights();
+    }
+    
     resetNetwork();
-    
-    createPixelGrid();
-    createOutputGrid();
-    createMembraneDisplay();
+    createUI();
     setupCanvas();
-    
-    // Event bindings
-    document.getElementById('pDur').oninput = function() {
-        document.getElementById('vDur').textContent = this.value;
-    };
-    document.getElementById('pLR').oninput = function() {
-        document.getElementById('vLR').textContent = this.value;
-        document.getElementById('sLR').textContent = (this.value / 20).toFixed(2);
-    };
-    
     selectDigit(5);
+    updateMemoryDisplay();
     
-    console.log("SNN Ready with learning capability!");
+    console.log("SNN with Memory Ready!");
 }
 
 function initializeWeights() {
-    // Initialize with basic pattern-based weights
-    // These will be refined through learning
-    
     W_ih = [];
+    weightImportance_ih = [];
+    
     for (let h = 0; h < HIDDEN_SIZE; h++) {
         const targetDigit = Math.floor(h / 3);
         const targetPixels = getPixels(targetDigit);
         
         const weights = [];
+        const importance = [];
+        
         for (let i = 0; i < INPUT_SIZE; i++) {
             if (targetPixels[i] > 0) {
-                // Start with moderate positive weight
                 weights.push(5.0 + Math.random() * 2);
             } else {
                 weights.push(-0.3 + Math.random() * 0.2);
             }
+            importance.push(0);  // Start with no importance
         }
+        
         W_ih.push(weights);
+        weightImportance_ih.push(importance);
     }
     
     W_ho = [];
+    weightImportance_ho = [];
+    
     for (let o = 0; o < OUTPUT_SIZE; o++) {
         const weights = [];
+        const importance = [];
+        
         for (let h = 0; h < HIDDEN_SIZE; h++) {
             const hiddenDigit = Math.floor(h / 3);
             if (hiddenDigit === o) {
-                // Start with moderate connection
                 weights.push(15.0 + Math.random() * 3);
             } else {
                 weights.push(-1.5 + Math.random() * 0.5);
             }
+            importance.push(0);
         }
+        
         W_ho.push(weights);
+        weightImportance_ho.push(importance);
     }
     
-    console.log("Weights initialized");
-}
-
-function resetWeights() {
-    if (confirm('Reset all weights and learning?')) {
-        initializeWeights();
-        tests = 0;
-        correct = 0;
-        learned = 0;
-        updateStats();
-        addLog('Weights reset to initial values', 'l');
-        document.getElementById('learnStatus').className = 'learn-status';
-        document.getElementById('learnStatus').textContent = 'Weights reset. Ready to learn again.';
-        document.getElementById('weightChanges').innerHTML = '';
-    }
+    digitMemoryStrength = new Array(10).fill(0);
+    digitLearnCount = new Array(10).fill(0);
+    consolidatedWeights_ih = null;
+    consolidatedWeights_ho = null;
+    
+    console.log("Fresh weights initialized");
 }
 
 function resetNetwork() {
@@ -403,32 +412,53 @@ function getPixels(digit) {
 // ================================================================
 // UI CREATION
 // ================================================================
-function createPixelGrid() {
-    const grid = document.getElementById('pixelGrid');
-    grid.innerHTML = '';
+function createUI() {
+    // Digit buttons with memory indicators
+    const digitGrid = document.getElementById('digitGrid');
+    digitGrid.innerHTML = '';
+    for (let d = 0; d < 10; d++) {
+        const btn = document.createElement('button');
+        btn.className = 'digit-btn' + (d === 5 ? ' active' : '');
+        btn.onclick = () => selectDigit(d);
+        btn.innerHTML = `${d}<span class="mem-dot" id="memDot${d}"></span>`;
+        digitGrid.appendChild(btn);
+    }
+    
+    // Pixel grid
+    const pixelGrid = document.getElementById('pixelGrid');
+    pixelGrid.innerHTML = '';
     for (let i = 0; i < 49; i++) {
         const px = document.createElement('div');
         px.className = 'pixel';
         px.id = 'px' + i;
-        grid.appendChild(px);
+        pixelGrid.appendChild(px);
     }
-}
-
-function createOutputGrid() {
-    const grid = document.getElementById('outputGrid');
-    grid.innerHTML = '';
+    
+    // Output grid
+    const outputGrid = document.getElementById('outputGrid');
+    outputGrid.innerHTML = '';
     for (let i = 0; i < 10; i++) {
         const cell = document.createElement('div');
         cell.className = 'out-cell';
         cell.id = 'oc' + i;
         cell.innerHTML = `<div class="d">${i}</div><div class="s" id="os${i}">0</div>`;
-        grid.appendChild(cell);
+        outputGrid.appendChild(cell);
     }
-}
-
-function createMembraneDisplay() {
-    const display = document.getElementById('membraneDisplay');
-    display.innerHTML = '';
+    
+    // Memory grid
+    const memGrid = document.getElementById('memoryGrid');
+    memGrid.innerHTML = '';
+    for (let d = 0; d < 10; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'memory-cell';
+        cell.id = 'mc' + d;
+        cell.innerHTML = `${d}<div class="strength"><div class="strength-fill" id="ms${d}"></div></div>`;
+        memGrid.appendChild(cell);
+    }
+    
+    // Membrane display
+    const memDisplay = document.getElementById('membraneDisplay');
+    memDisplay.innerHTML = '';
     for (let o = 0; o < OUTPUT_SIZE; o++) {
         const row = document.createElement('div');
         row.className = 'membrane-row';
@@ -437,7 +467,7 @@ function createMembraneDisplay() {
             <div class="bar"><div class="fill" id="mf${o}" style="width:0%;background:#f093fb"></div></div>
             <span class="val" id="mv${o}">-65</span>
         `;
-        display.appendChild(row);
+        memDisplay.appendChild(row);
     }
 }
 
@@ -457,90 +487,106 @@ function drawNetwork() {
     ctx.fillStyle = '#050510';
     ctx.fillRect(0, 0, w, h);
     
-    // Positions
-    const inX = 25, hidX = w * 0.45, outX = w - 30;
+    const inX = 20, hidX = w * 0.45, outX = w - 25;
     
-    // Faint connections
     ctx.strokeStyle = 'rgba(255,255,255,0.02)';
     ctx.lineWidth = 0.5;
     
-    for (let i = 0; i < 8; i++) {
-        for (let hh = 0; hh < 8; hh++) {
+    for (let i = 0; i < 7; i++) {
+        for (let hh = 0; hh < 7; hh++) {
             ctx.beginPath();
-            ctx.moveTo(inX + 6, 15 + i * 25);
-            ctx.lineTo(hidX - 6, 12 + hh * 25);
+            ctx.moveTo(inX + 5, 12 + i * 23);
+            ctx.lineTo(hidX - 5, 10 + hh * 23);
             ctx.stroke();
         }
     }
     
-    for (let hh = 0; hh < 8; hh++) {
+    for (let hh = 0; hh < 7; hh++) {
         for (let o = 0; o < 10; o++) {
             ctx.beginPath();
-            ctx.moveTo(hidX + 6, 12 + hh * 25);
-            ctx.lineTo(outX - 6, 12 + o * 20);
+            ctx.moveTo(hidX + 5, 10 + hh * 23);
+            ctx.lineTo(outX - 5, 10 + o * 17);
             ctx.stroke();
         }
     }
     
-    // Input neurons
     ctx.fillStyle = 'rgba(0, 245, 160, 0.3)';
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 7; i++) {
         ctx.beginPath();
-        ctx.arc(inX, 15 + i * 25, 5, 0, Math.PI * 2);
+        ctx.arc(inX, 12 + i * 23, 4, 0, Math.PI * 2);
         ctx.fill();
     }
     
-    // Hidden neurons
     ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-    for (let h = 0; h < 8; h++) {
+    for (let h = 0; h < 7; h++) {
         ctx.beginPath();
-        ctx.arc(hidX, 12 + h * 25, 5, 0, Math.PI * 2);
+        ctx.arc(hidX, 10 + h * 23, 4, 0, Math.PI * 2);
         ctx.fill();
     }
     
-    // Output neurons
     ctx.fillStyle = 'rgba(240, 147, 251, 0.3)';
     for (let o = 0; o < 10; o++) {
         ctx.beginPath();
-        ctx.arc(outX, 12 + o * 20, 5, 0, Math.PI * 2);
+        ctx.arc(outX, 10 + o * 17, 4, 0, Math.PI * 2);
         ctx.fill();
     }
-    
-    ctx.fillStyle = '#333';
-    ctx.font = '8px Arial';
-    ctx.fillText('In', inX - 5, h - 3);
-    ctx.fillText('Hid', hidX - 8, h - 3);
-    ctx.fillText('Out', outX - 8, h - 3);
 }
 
 function flashNeuron(layer, idx) {
     const w = document.getElementById('netCanvas').offsetWidth;
-    
     let x, y, color;
     
     if (layer === 'input') {
-        x = 25;
-        y = 15 + (idx % 8) * 25;
-        color = '#00f5a0';
+        x = 20; y = 12 + (idx % 7) * 23; color = '#00f5a0';
     } else if (layer === 'hidden') {
-        x = w * 0.45;
-        y = 12 + (idx % 8) * 25;
-        color = '#ffd700';
+        x = w * 0.45; y = 10 + (idx % 7) * 23; color = '#ffd700';
     } else {
-        x = w - 30;
-        y = 12 + idx * 20;
-        color = '#f093fb';
+        x = w - 25; y = 10 + idx * 17; color = '#f093fb';
     }
     
     ctx.beginPath();
-    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
     ctx.fillStyle = color + '50';
     ctx.fill();
     
     ctx.beginPath();
-    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.fill();
+}
+
+// ================================================================
+// MEMORY DISPLAY
+// ================================================================
+function updateMemoryDisplay() {
+    let memorizedCount = 0;
+    let totalStrength = 0;
+    
+    for (let d = 0; d < 10; d++) {
+        const strength = digitMemoryStrength[d];
+        const cell = document.getElementById('mc' + d);
+        const strengthBar = document.getElementById('ms' + d);
+        const dot = document.getElementById('memDot' + d);
+        
+        strengthBar.style.width = strength + '%';
+        
+        if (strength >= 70) {
+            cell.className = 'memory-cell memorized';
+            dot.className = 'mem-dot learned';
+            memorizedCount++;
+        } else if (strength >= 30) {
+            cell.className = 'memory-cell partial';
+            dot.className = 'mem-dot partial';
+        } else {
+            cell.className = 'memory-cell';
+            dot.className = 'mem-dot';
+        }
+        
+        totalStrength += strength;
+    }
+    
+    document.getElementById('memCount').textContent = memorizedCount;
+    document.getElementById('memStrength').textContent = Math.round(totalStrength / 10) + '%';
 }
 
 // ================================================================
@@ -596,10 +642,11 @@ async function runSimulation() {
     running = true;
     
     document.getElementById('goBtn').disabled = true;
-    document.getElementById('goBtn').textContent = '⏳ Running...';
+    document.getElementById('goBtn').textContent = '⏳...';
     
-    const duration = parseInt(document.getElementById('pDur').value);
+    const duration = 200;
     const dt = 1.0;
+    const inputRate = 600;
     
     resetNetwork();
     clearRaster();
@@ -607,20 +654,19 @@ async function runSimulation() {
     document.getElementById('log').innerHTML = '';
     document.getElementById('weightChanges').innerHTML = '';
     
-    document.getElementById('status').textContent = '⚡ Processing spikes...';
+    document.getElementById('status').textContent = '⚡ Processing...';
     document.getElementById('learnStatus').className = 'learn-status';
-    document.getElementById('learnStatus').textContent = 'Running simulation...';
+    document.getElementById('learnStatus').textContent = 'Running...';
     
     const steps = Math.floor(duration / dt);
-    const inputRate = 600; // Hz
     
-    addLog(`Starting: digit=${currentDigit}, ${duration}ms`, 'i');
+    addLog(`Input: ${currentDigit}`, 'i');
     
     // ==================== SIMULATION LOOP ====================
     for (let step = 0; step < steps; step++) {
         const t = step * dt;
         
-        if (step % 10 === 0) {
+        if (step % 15 === 0) {
             await sleep(1);
             document.getElementById('progFill').style.width = (step / steps * 100) + '%';
             document.getElementById('cntIn').textContent = totalIn;
@@ -629,45 +675,32 @@ async function runSimulation() {
             updateMembraneDisplay();
         }
         
-        // ===== INPUT SPIKES =====
+        // Input spikes
         const inputSpikes = [];
         for (let i = 0; i < INPUT_SIZE; i++) {
-            if (pixels[i] > 0) {
-                if (Math.random() < inputRate * dt / 1000) {
-                    inputSpikes.push(i);
-                    totalIn++;
-                }
+            if (pixels[i] > 0 && Math.random() < inputRate * dt / 1000) {
+                inputSpikes.push(i);
+                totalIn++;
             }
         }
         
-        // Visualize & propagate input spikes
         for (const i of inputSpikes) {
             const px = document.getElementById('px' + i);
-            if (px) {
-                px.classList.add('spike');
-                setTimeout(() => px.classList.remove('spike'), 50);
-            }
+            if (px) { px.classList.add('spike'); setTimeout(() => px.classList.remove('spike'), 40); }
             flashNeuron('input', i);
             addRasterDot(t, duration, i / INPUT_SIZE, 'input');
             
-            // Add current to hidden neurons
             for (let h = 0; h < HIDDEN_SIZE; h++) {
                 I_hid[h] += W_ih[h][i];
             }
         }
         
-        // ===== UPDATE HIDDEN NEURONS =====
+        // Hidden neurons
         const hiddenSpikes = [];
         for (let h = 0; h < HIDDEN_SIZE; h++) {
-            if (ref_hid[h] > 0) {
-                ref_hid[h] -= dt;
-                V_hid[h] = V_RESET;
-                I_hid[h] = 0;
-                continue;
-            }
+            if (ref_hid[h] > 0) { ref_hid[h] -= dt; V_hid[h] = V_RESET; I_hid[h] = 0; continue; }
             
-            const dV = (-(V_hid[h] - V_REST) + I_hid[h]) * dt / TAU_M;
-            V_hid[h] += dV;
+            V_hid[h] += (-(V_hid[h] - V_REST) + I_hid[h]) * dt / TAU_M;
             
             if (V_hid[h] >= V_THRESH) {
                 hiddenSpikes.push(h);
@@ -676,7 +709,6 @@ async function runSimulation() {
                 V_hid[h] = V_RESET;
                 ref_hid[h] = TAU_REF;
                 
-                // Propagate to output
                 for (let o = 0; o < OUTPUT_SIZE; o++) {
                     I_out[o] += W_ho[o][h];
                 }
@@ -690,18 +722,12 @@ async function runSimulation() {
             addRasterDot(t, duration, h / HIDDEN_SIZE, 'hidden');
         }
         
-        // ===== UPDATE OUTPUT NEURONS =====
+        // Output neurons
         const outputSpikes = [];
         for (let o = 0; o < OUTPUT_SIZE; o++) {
-            if (ref_out[o] > 0) {
-                ref_out[o] -= dt;
-                V_out[o] = V_RESET;
-                I_out[o] = 0;
-                continue;
-            }
+            if (ref_out[o] > 0) { ref_out[o] -= dt; V_out[o] = V_RESET; I_out[o] = 0; continue; }
             
-            const dV = (-(V_out[o] - V_REST) + I_out[o]) * dt / TAU_M;
-            V_out[o] += dV;
+            V_out[o] += (-(V_out[o] - V_REST) + I_out[o]) * dt / TAU_M;
             
             if (V_out[o] >= V_THRESH) {
                 outputSpikes.push(o);
@@ -720,55 +746,44 @@ async function runSimulation() {
         for (const o of outputSpikes) {
             flashNeuron('output', o);
             addRasterDot(t, duration, o / OUTPUT_SIZE, 'output');
-            addLog(`OUTPUT ${o} fired! (${spkCnt_out[o]})`, 'o');
+            addLog(`OUT ${o}: ${spkCnt_out[o]}`, 'o');
         }
     }
     
     // ==================== RESULTS & LEARNING ====================
     const maxSpikes = Math.max(...spkCnt_out);
     const winner = spkCnt_out.indexOf(maxSpikes);
-    
-    lastInput = currentDigit;
-    lastOutput = winner;
-    lastWasCorrect = (winner === currentDigit && maxSpikes > 0);
+    const isCorrect = (winner === currentDigit && maxSpikes > 0);
     
     tests++;
-    if (lastWasCorrect) correct++;
+    if (isCorrect) correct++;
     
-    // Highlight winner
     for (let o = 0; o < OUTPUT_SIZE; o++) {
-        const cell = document.getElementById('oc' + o);
-        cell.classList.remove('winner');
-        if (o === winner && maxSpikes > 0) {
-            cell.classList.add('winner');
-        }
+        document.getElementById('oc' + o).classList.toggle('winner', o === winner && maxSpikes > 0);
     }
     
-    // Show result
     document.getElementById('resultDigit').textContent = maxSpikes > 0 ? winner : '?';
-    document.getElementById('resultBox').className = 'result ' + (lastWasCorrect ? 'correct' : 'wrong');
-    document.getElementById('resultInfo').textContent = lastWasCorrect 
-        ? `✓ CORRECT! ${maxSpikes} spikes`
-        : (maxSpikes > 0 ? `✗ Wrong! Expected ${currentDigit}` : 'No output');
+    document.getElementById('resultBox').className = 'result ' + (isCorrect ? 'correct' : 'wrong');
+    document.getElementById('resultInfo').textContent = isCorrect 
+        ? `✓ CORRECT!`
+        : (maxSpikes > 0 ? `✗ Wrong!` : 'No output');
     
-    document.getElementById('status').textContent = lastWasCorrect 
-        ? `✅ Correct! Digit ${winner}`
-        : `❌ Wrong! Got ${maxSpikes > 0 ? winner : '?'}, expected ${currentDigit}`;
+    document.getElementById('status').textContent = isCorrect 
+        ? `✅ Correct: ${winner}`
+        : `❌ Wrong: ${maxSpikes > 0 ? winner : '?'} (expected ${currentDigit})`;
     
     document.getElementById('progFill').style.width = '100%';
     
-    // ===== LEARNING =====
-    if (!lastWasCorrect) {
-        await performLearning(currentDigit, winner, maxSpikes > 0);
+    // ===== LEARNING WITH MEMORY PROTECTION =====
+    if (!isCorrect) {
+        await learnWithMemory(currentDigit, winner, maxSpikes > 0);
     } else {
-        // Reinforce correct answer
-        reinforceCorrect(currentDigit);
-        
-        document.getElementById('learnStatus').className = 'learn-status success';
-        document.getElementById('learnStatus').textContent = '✓ Correct! Reinforcing connections.';
+        reinforceWithMemory(currentDigit);
     }
     
     updateStats();
+    updateMemoryDisplay();
+    autoSaveMemory();
     
     running = false;
     document.getElementById('goBtn').disabled = false;
@@ -776,165 +791,271 @@ async function runSimulation() {
 }
 
 // ================================================================
-// LEARNING FUNCTIONS
+// LEARNING WITH MEMORY PROTECTION
 // ================================================================
-async function performLearning(correctDigit, wrongOutput, hadOutput) {
-    const lr = parseInt(document.getElementById('pLR').value) / 20;
+async function learnWithMemory(correctDigit, wrongOutput, hadOutput) {
+    const lr = 0.5;
     
     document.getElementById('learnStatus').className = 'learn-status learning';
-    document.getElementById('learnStatus').innerHTML = `
-        🎓 <b>LEARNING FROM ERROR</b><br>
-        Expected: ${correctDigit} | Got: ${hadOutput ? wrongOutput : 'nothing'}<br>
-        Adjusting weights...
-    `;
+    document.getElementById('learnStatus').innerHTML = `🎓 Learning: ${correctDigit}`;
     
     const changesDiv = document.getElementById('weightChanges');
-    changesDiv.innerHTML = '<div style="color:#ffd700;font-size:0.7rem;margin-bottom:5px">Weight Changes:</div>';
+    changesDiv.innerHTML = '';
     
-    learned++;
+    digitLearnCount[correctDigit]++;
     
     const correctPixels = getPixels(correctDigit);
     const correctHiddenStart = correctDigit * 3;
     
-    // ===== STRENGTHEN CORRECT PATHWAY =====
-    
-    // 1. Strengthen Input -> Hidden for correct digit
+    // ===== STRENGTHEN CORRECT PATHWAY (with memory protection) =====
     for (let h = correctHiddenStart; h < correctHiddenStart + 3; h++) {
         for (let i = 0; i < INPUT_SIZE; i++) {
             if (correctPixels[i] > 0) {
                 const oldW = W_ih[h][i];
-                W_ih[h][i] += lr * 2.0;
-                W_ih[h][i] = Math.min(W_ih[h][i], 15); // Cap
                 
-                if (Math.random() < 0.1) {
-                    addWeightChange(`W_ih[${h}][${i}]: ${oldW.toFixed(1)} → ${W_ih[h][i].toFixed(1)}`, 'up');
-                }
+                // Learning rate scaled by inverse importance of OTHER patterns
+                const protectionFactor = 1.0;
+                const change = lr * 2.5 * protectionFactor;
+                
+                W_ih[h][i] += change;
+                W_ih[h][i] = Math.min(W_ih[h][i], 18);
+                
+                // Increase importance of this weight
+                weightImportance_ih[h][i] = Math.min(1, weightImportance_ih[h][i] + 0.1);
             }
         }
-    }
-    
-    // 2. Strengthen Hidden -> Output for correct digit
-    for (let h = correctHiddenStart; h < correctHiddenStart + 3; h++) {
-        const oldW = W_ho[correctDigit][h];
-        W_ho[correctDigit][h] += lr * 5.0;
-        W_ho[correctDigit][h] = Math.min(W_ho[correctDigit][h], 40); // Cap
         
-        addWeightChange(`W_ho[${correctDigit}][${h}]: ${oldW.toFixed(1)} → ${W_ho[correctDigit][h].toFixed(1)}`, 'up');
+        // Hidden -> Output
+        const oldHO = W_ho[correctDigit][h];
+        
+        // Protect other memorized pathways
+        let protectionFactor = 1.0;
+        for (let otherD = 0; otherD < 10; otherD++) {
+            if (otherD !== correctDigit && digitMemoryStrength[otherD] > 50) {
+                // Reduce learning impact on consolidated weights
+                protectionFactor *= 0.8;
+            }
+        }
+        
+        const change = lr * 6.0 * protectionFactor;
+        W_ho[correctDigit][h] += change;
+        W_ho[correctDigit][h] = Math.min(W_ho[correctDigit][h], 45);
+        
+        weightImportance_ho[correctDigit][h] = Math.min(1, weightImportance_ho[correctDigit][h] + 0.15);
+        
+        addWeightChange(`H${h}→O${correctDigit}: +${change.toFixed(1)}`, 'up');
     }
     
-    addLog(`Strengthened pathway for digit ${correctDigit}`, 'l');
-    
-    // ===== WEAKEN WRONG PATHWAY (if there was wrong output) =====
+    // ===== WEAKEN WRONG PATHWAY (carefully) =====
     if (hadOutput && wrongOutput !== correctDigit) {
-        const wrongHiddenStart = wrongOutput * 3;
+        const wrongProtection = digitMemoryStrength[wrongOutput] / 100;
         
-        // Weaken Hidden -> Wrong Output
+        // Don't weaken too much if this digit is already memorized
+        const weakenFactor = Math.max(0.3, 1 - wrongProtection);
+        
         for (let h = 0; h < HIDDEN_SIZE; h++) {
-            const oldW = W_ho[wrongOutput][h];
-            W_ho[wrongOutput][h] -= lr * 1.5;
-            W_ho[wrongOutput][h] = Math.max(W_ho[wrongOutput][h], -5); // Floor
+            const importance = weightImportance_ho[wrongOutput][h];
             
-            if (h >= wrongHiddenStart && h < wrongHiddenStart + 3) {
-                addWeightChange(`W_ho[${wrongOutput}][${h}]: ${oldW.toFixed(1)} → ${W_ho[wrongOutput][h].toFixed(1)}`, 'down');
-            }
+            // Don't weaken important connections much
+            const change = lr * 1.5 * weakenFactor * (1 - importance * 0.5);
+            W_ho[wrongOutput][h] -= change;
+            W_ho[wrongOutput][h] = Math.max(W_ho[wrongOutput][h], -4);
         }
         
-        addLog(`Weakened pathway for digit ${wrongOutput}`, 'l');
+        if (wrongProtection < 0.5) {
+            addWeightChange(`→O${wrongOutput}: weakened`, 'down');
+        } else {
+            addWeightChange(`→O${wrongOutput}: protected`, 'protect');
+        }
     }
     
-    // ===== INCREASE GENERAL SENSITIVITY =====
-    // If no output at all, increase all weights slightly
-    if (!hadOutput) {
-        for (let h = 0; h < HIDDEN_SIZE; h++) {
-            for (let i = 0; i < INPUT_SIZE; i++) {
-                if (W_ih[h][i] > 0) {
-                    W_ih[h][i] += lr * 0.5;
-                }
-            }
-        }
-        
-        for (let o = 0; o < OUTPUT_SIZE; o++) {
-            for (let h = 0; h < HIDDEN_SIZE; h++) {
-                if (W_ho[o][h] > 0) {
-                    W_ho[o][h] += lr * 0.5;
-                }
-            }
-        }
-        
-        addWeightChange('All positive weights increased slightly', 'up');
-        addLog('Increased overall sensitivity', 'l');
-    }
+    // ===== UPDATE MEMORY STRENGTH =====
+    const learnBoost = Math.min(25, 15 + digitLearnCount[correctDigit] * 2);
+    digitMemoryStrength[correctDigit] = Math.min(100, digitMemoryStrength[correctDigit] + learnBoost);
     
-    await sleep(100);
+    addLog(`Memory[${correctDigit}]: ${digitMemoryStrength[correctDigit].toFixed(0)}%`, 'm');
     
     document.getElementById('learnStatus').className = 'learn-status error';
     document.getElementById('learnStatus').innerHTML = `
-        ❌ Error corrected!<br>
-        Pathway for "${correctDigit}" strengthened.<br>
-        ${hadOutput ? `Pathway for "${wrongOutput}" weakened.` : 'Sensitivity increased.'}
+        ✓ Learned "${correctDigit}"<br>
+        Memory: ${digitMemoryStrength[correctDigit].toFixed(0)}%
     `;
 }
 
-function reinforceCorrect(digit) {
-    const lr = parseInt(document.getElementById('pLR').value) / 20 * 0.3; // Smaller reinforcement
+function reinforceWithMemory(digit) {
+    const lr = 0.15;
     
     const digitPixels = getPixels(digit);
     const hiddenStart = digit * 3;
     
-    // Slightly strengthen correct connections
     for (let h = hiddenStart; h < hiddenStart + 3; h++) {
         for (let i = 0; i < INPUT_SIZE; i++) {
             if (digitPixels[i] > 0) {
-                W_ih[h][i] += lr * 0.5;
-                W_ih[h][i] = Math.min(W_ih[h][i], 15);
+                W_ih[h][i] += lr * 0.3;
+                W_ih[h][i] = Math.min(W_ih[h][i], 18);
+                weightImportance_ih[h][i] = Math.min(1, weightImportance_ih[h][i] + 0.05);
             }
         }
         
-        W_ho[digit][h] += lr * 1.0;
-        W_ho[digit][h] = Math.min(W_ho[digit][h], 40);
+        W_ho[digit][h] += lr * 0.8;
+        W_ho[digit][h] = Math.min(W_ho[digit][h], 45);
+        weightImportance_ho[digit][h] = Math.min(1, weightImportance_ho[digit][h] + 0.08);
     }
     
-    addLog(`Reinforced correct pathway for ${digit}`, 'i');
-}
-
-function addWeightChange(text, direction) {
-    const div = document.getElementById('weightChanges');
-    const change = document.createElement('div');
-    change.className = 'weight-change ' + direction;
-    change.textContent = (direction === 'up' ? '↑ ' : '↓ ') + text;
-    div.appendChild(change);
+    digitMemoryStrength[digit] = Math.min(100, digitMemoryStrength[digit] + 5);
     
-    // Limit displayed changes
-    while (div.children.length > 8) {
-        div.removeChild(div.children[1]);
-    }
-}
-
-function updateStats() {
-    document.getElementById('sTests').textContent = tests;
-    document.getElementById('sCorrect').textContent = correct;
-    document.getElementById('sLearned').textContent = learned;
+    document.getElementById('learnStatus').className = 'learn-status success';
+    document.getElementById('learnStatus').innerHTML = `
+        ✓ Reinforced "${digit}"<br>
+        Memory: ${digitMemoryStrength[digit].toFixed(0)}%
+    `;
     
-    const acc = tests > 0 ? Math.round(correct / tests * 100) : 0;
-    document.getElementById('accValue').textContent = acc + '%';
-    document.getElementById('accValue').style.color = acc >= 70 ? '#00f5a0' : acc >= 40 ? '#ffd700' : '#f5576c';
-    document.getElementById('accFill').style.width = acc + '%';
+    addLog(`Reinforced[${digit}]: ${digitMemoryStrength[digit].toFixed(0)}%`, 'i');
 }
 
 // ================================================================
-// AUTO TRAINING
+// MEMORY CONSOLIDATION
+// ================================================================
+function consolidateMemory() {
+    document.getElementById('learnStatus').className = 'learn-status consolidating';
+    document.getElementById('learnStatus').innerHTML = '🔒 Consolidating memory...';
+    
+    // Save current weights as consolidated
+    consolidatedWeights_ih = JSON.parse(JSON.stringify(W_ih));
+    consolidatedWeights_ho = JSON.parse(JSON.stringify(W_ho));
+    
+    // Boost importance of well-learned patterns
+    for (let d = 0; d < 10; d++) {
+        if (digitMemoryStrength[d] >= 50) {
+            const hiddenStart = d * 3;
+            
+            for (let h = hiddenStart; h < hiddenStart + 3; h++) {
+                for (let i = 0; i < INPUT_SIZE; i++) {
+                    weightImportance_ih[h][i] = Math.min(1, weightImportance_ih[h][i] + 0.3);
+                }
+                
+                weightImportance_ho[d][h] = Math.min(1, weightImportance_ho[d][h] + 0.3);
+            }
+            
+            digitMemoryStrength[d] = Math.min(100, digitMemoryStrength[d] + 10);
+        }
+    }
+    
+    addLog('Memory consolidated!', 'm');
+    updateMemoryDisplay();
+    saveMemoryToStorage();
+    
+    setTimeout(() => {
+        document.getElementById('learnStatus').className = 'learn-status success';
+        document.getElementById('learnStatus').innerHTML = '🔒 Memory consolidated & protected!';
+    }, 500);
+}
+
+// ================================================================
+// PERSISTENT STORAGE
+// ================================================================
+function saveMemoryToStorage() {
+    const memory = {
+        W_ih: W_ih,
+        W_ho: W_ho,
+        weightImportance_ih: weightImportance_ih,
+        weightImportance_ho: weightImportance_ho,
+        digitMemoryStrength: digitMemoryStrength,
+        digitLearnCount: digitLearnCount,
+        consolidatedWeights_ih: consolidatedWeights_ih,
+        consolidatedWeights_ho: consolidatedWeights_ho,
+        tests: tests,
+        correct: correct
+    };
+    
+    try {
+        localStorage.setItem('snn_memory', JSON.stringify(memory));
+        return true;
+    } catch (e) {
+        console.error('Failed to save memory:', e);
+        return false;
+    }
+}
+
+function loadMemoryFromStorage() {
+    try {
+        const data = localStorage.getItem('snn_memory');
+        if (!data) return false;
+        
+        const memory = JSON.parse(data);
+        
+        W_ih = memory.W_ih;
+        W_ho = memory.W_ho;
+        weightImportance_ih = memory.weightImportance_ih;
+        weightImportance_ho = memory.weightImportance_ho;
+        digitMemoryStrength = memory.digitMemoryStrength;
+        digitLearnCount = memory.digitLearnCount;
+        consolidatedWeights_ih = memory.consolidatedWeights_ih;
+        consolidatedWeights_ho = memory.consolidatedWeights_ho;
+        tests = memory.tests || 0;
+        correct = memory.correct || 0;
+        
+        console.log('Memory loaded from storage!');
+        addLog('Memory restored!', 'm');
+        return true;
+    } catch (e) {
+        console.error('Failed to load memory:', e);
+        return false;
+    }
+}
+
+function autoSaveMemory() {
+    saveMemoryToStorage();
+}
+
+function saveMemory() {
+    if (saveMemoryToStorage()) {
+        alert('Memory saved! Your network will remember this even after closing the browser.');
+        addLog('Memory saved to storage', 'm');
+    } else {
+        alert('Failed to save memory!');
+    }
+}
+
+function loadMemory() {
+    if (loadMemoryFromStorage()) {
+        updateMemoryDisplay();
+        updateStats();
+        alert('Memory loaded!');
+    } else {
+        alert('No saved memory found.');
+    }
+}
+
+function fullReset() {
+    if (confirm('This will erase ALL memory and learning. Are you sure?')) {
+        localStorage.removeItem('snn_memory');
+        initializeWeights();
+        tests = 0;
+        correct = 0;
+        updateStats();
+        updateMemoryDisplay();
+        addLog('Full reset - all memory erased', 'l');
+        document.getElementById('learnStatus').textContent = 'Memory cleared. Fresh start!';
+    }
+}
+
+// ================================================================
+// AUTO TRAIN
 // ================================================================
 async function autoTrain() {
     if (running) return;
     
-    document.getElementById('status').textContent = '🔄 Auto-training 10 random digits...';
+    document.getElementById('status').textContent = '🔄 Auto-training...';
     
     for (let i = 0; i < 10; i++) {
         selectDigit(Math.floor(Math.random() * 10));
-        await sleep(200);
+        await sleep(100);
         await runSimulation();
-        await sleep(300);
+        await sleep(200);
     }
+    
+    consolidateMemory();
     
     document.getElementById('status').textContent = `✅ Training complete! Accuracy: ${Math.round(correct/tests*100)}%`;
 }
@@ -945,21 +1066,15 @@ async function autoTrain() {
 function updateMembraneDisplay() {
     for (let o = 0; o < OUTPUT_SIZE; o++) {
         const normalized = Math.max(0, Math.min(100, (V_out[o] - V_RESET) / (V_THRESH - V_RESET) * 100));
-        
         const fill = document.getElementById('mf' + o);
         fill.style.width = normalized + '%';
-        
-        if (normalized > 80) fill.style.background = '#ff5555';
-        else if (normalized > 50) fill.style.background = '#ffd700';
-        else fill.style.background = '#f093fb';
-        
+        fill.style.background = normalized > 80 ? '#ff5555' : normalized > 50 ? '#ffd700' : '#f093fb';
         document.getElementById('mv' + o).textContent = V_out[o].toFixed(0);
     }
 }
 
 function clearRaster() {
-    const raster = document.getElementById('raster');
-    raster.querySelectorAll('.raster-dot').forEach(d => d.remove());
+    document.getElementById('raster').querySelectorAll('.raster-dot').forEach(d => d.remove());
 }
 
 function addRasterDot(t, duration, yNorm, layer) {
@@ -967,12 +1082,12 @@ function addRasterDot(t, duration, yNorm, layer) {
     const dot = document.createElement('div');
     dot.className = 'raster-dot';
     
-    const x = 5 + (t / duration) * (raster.offsetWidth - 10);
+    const x = 3 + (t / duration) * (raster.offsetWidth - 6);
     let y, color;
     
-    if (layer === 'input') { y = 5 + yNorm * 20; color = '#00f5a0'; }
-    else if (layer === 'hidden') { y = 28 + yNorm * 20; color = '#ffd700'; }
-    else { y = 50 + yNorm * 18; color = '#f093fb'; }
+    if (layer === 'input') { y = 3 + yNorm * 18; color = '#00f5a0'; }
+    else if (layer === 'hidden') { y = 23 + yNorm * 16; color = '#ffd700'; }
+    else { y = 42 + yNorm * 15; color = '#f093fb'; }
     
     dot.style.left = x + 'px';
     dot.style.top = y + 'px';
@@ -981,18 +1096,35 @@ function addRasterDot(t, duration, yNorm, layer) {
     raster.appendChild(dot);
 }
 
+function addWeightChange(text, type) {
+    const div = document.getElementById('weightChanges');
+    const wc = document.createElement('div');
+    wc.className = 'wc ' + type;
+    wc.textContent = text;
+    div.appendChild(wc);
+    while (div.children.length > 6) div.removeChild(div.firstChild);
+}
+
 function addLog(msg, type) {
     const log = document.getElementById('log');
     const div = document.createElement('div');
     div.className = type;
     div.textContent = msg;
     log.insertBefore(div, log.firstChild);
-    while (log.children.length > 100) log.removeChild(log.lastChild);
+    while (log.children.length > 80) log.removeChild(log.lastChild);
 }
 
-function sleep(ms) {
-    return new Promise(r => setTimeout(r, ms));
+function updateStats() {
+    document.getElementById('sTests').textContent = tests;
+    document.getElementById('sCorrect').textContent = correct;
+    
+    const acc = tests > 0 ? Math.round(correct / tests * 100) : 0;
+    document.getElementById('accValue').textContent = acc + '%';
+    document.getElementById('accValue').style.color = acc >= 70 ? '#00f5a0' : acc >= 40 ? '#ffd700' : '#f5576c';
+    document.getElementById('accFill').style.width = acc + '%';
 }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ================================================================
 // START
